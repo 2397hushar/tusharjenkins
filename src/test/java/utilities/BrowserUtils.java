@@ -89,7 +89,7 @@ public class BrowserUtils {
             System.out.println("Edge browser launched via WebDriverManager");
         } catch (Exception e) {
             System.out.println("WebDriverManager failed, trying local Edge driver...");
-            System.setProperty("webdriver.edge.driver", "C:\\Users\\tushar.sangale.VIBGYORSCHOOLS\\Downloads\\ecommerce-task-master\\driver\\msedgedriver.exe");
+            System.setProperty("webdriver.edge.driver", "C:\\Users\\tushar.sangale\\Downloads\\UpdatedFrameworkChanges-master (1)\\UpdatedFrameworkChanges-master\\workselenium\\driver\\msedgedriver.exe");
             EdgeOptions options = new EdgeOptions();
             options.addArguments("--remote-allow-origins=*");
             driver = new EdgeDriver(options);

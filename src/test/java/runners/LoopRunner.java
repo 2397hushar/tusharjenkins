@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 @CucumberOptions(
     features = "src/test/resources/features/Reportcard.feature",
-    glue = "stepDefinitions",
+    glue = {"stepDefinitions","ERP_Page"},
     plugin = {
         "pretty",
         "html:target/cucumber-reports-multiple.html",

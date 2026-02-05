@@ -15,13 +15,16 @@ public class TestConfig {
     public static final String LOGIN_URL = BASE_URL;
     public static final String INVENTORY_URL = BASE_URL + "inventory.html";
     
-    // Screenshot Configuration  if you want you can just uncmmoent below line of code screesnshot
-    public static final String SCREENSHOT_PATH = "target/screenshots/";
+    // Screenshot Configuration
+    public static final String SCREENSHOT_PATH = System.getProperty("user.dir") + "/target/screenshots/";
+    
+    // Extent Report Configuration - Use relative paths
+    public static final String EXTENT_REPORT_PATH = System.getProperty("user.dir") + "/target/extent-reports/";
+    public static final String REPORT_NAME = "ERP Automation Report";
+    public static final String DOCUMENT_TITLE = "ERP Test Results";
+    
     public static final boolean TAKE_SCREENSHOT_ON_FAILURE = true;
     public static final boolean TAKE_SCREENSHOT_ON_SUCCESS = false;
-	public static final String DOCUMENT_TITLE = "Test Report";
-	public static final String EXTENT_REPORT_PATH = "C:\\Users\\tushar.sangale.VIBGYORSCHOOLS\\Downloads\\ecommerce-task-master\\ExtentReport";
-	public static final String REPORT_NAME = "ExtentReport";
     
     // Test Data
     public static class Users {

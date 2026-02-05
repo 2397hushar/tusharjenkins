@@ -5,7 +5,6 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.MediaEntityBuilder;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.markuputils.ExtentColor;
-import com.aventstack.extentreports.markuputils.Markup;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 import com.aventstack.extentreports.reporter.configuration.Theme;
@@ -23,6 +22,11 @@ public class ExtentReportManager {
     private static ThreadLocal<ExtentTest> step = new ThreadLocal<>();
     private static String currentReportPath;
 
+    // Initialize Extent Report at the start
+    static {
+        createInstance();
+    }
+
     public static ExtentReports getInstance() {
         if (extent == null) {
             createInstance();
@@ -32,21 +36,24 @@ public class ExtentReportManager {
 
     public static ExtentReports createInstance() {
         try {
+            // Clean old reports first
+            cleanupOldReports();
+            
             // Generate daily folder path
             String dailyFolder = getDailyFolderPath();
             
             // Create daily report directory if it doesn't exist
             File reportDir = new File(dailyFolder);
             if (!reportDir.exists()) {
-                reportDir.mkdirs();
+                boolean created = reportDir.mkdirs();
+                if (created) {
+                    System.out.println("✅ Created report directory: " + dailyFolder);
+                }
             }
 
-            // Clean old reports before creating new one
-            cleanOldReports(dailyFolder);
-
             // Generate report file name with timestamp
-            String timeStamp = new SimpleDateFormat("HHmmss").format(new Date());
-            String reportPath = dailyFolder + "ExtentReport_" + timeStamp + ".html";
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String reportPath = dailyFolder + "ERP_Report_" + timeStamp + ".html";
             currentReportPath = reportPath;
 
             ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
@@ -57,40 +64,46 @@ public class ExtentReportManager {
             sparkReporter.config().setTheme(Theme.STANDARD);
             sparkReporter.config().setEncoding("UTF-8");
             sparkReporter.config().setTimeStampFormat("MMM dd, yyyy HH:mm:ss");
+            sparkReporter.config().setCss(".badge-primary {background-color: #2196F3;}");
 
             extent = new ExtentReports();
             extent.attachReporter(sparkReporter);
             
             // System information
-            extent.setSystemInfo("Organization", "SauceDemo");
-            extent.setSystemInfo("Project", "Automation Framework");
-            extent.setSystemInfo("Environment", "Test");
+            extent.setSystemInfo("Organization", "Vibgyor Schools");
+            extent.setSystemInfo("Project", "ERP Automation");
+            extent.setSystemInfo("Environment", "Pre-Production");
             extent.setSystemInfo("OS", System.getProperty("os.name"));
             extent.setSystemInfo("Java Version", System.getProperty("java.version"));
             extent.setSystemInfo("Browser", TestConfig.BROWSER.toUpperCase());
             extent.setSystemInfo("URL", TestConfig.BASE_URL);
             extent.setSystemInfo("User", System.getProperty("user.name"));
+            extent.setSystemInfo("Execution Time", new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date()));
 
-            System.out.println("Extent Report initialized: " + reportPath);
+            System.out.println("✅ Extent Report initialized: " + reportPath);
             
         } catch (Exception e) {
-            System.out.println("Error initializing Extent Report: " + e.getMessage());
+            System.out.println("❌ Error initializing Extent Report: " + e.getMessage());
             e.printStackTrace();
         }
         return extent;
     }
 
-    // Method to clean old reports
-    private static void cleanOldReports(String dailyFolder) {
+    // Method to clean old reports (keep only last 5 reports)
+    private static void cleanupOldReports() {
         try {
+            String dailyFolder = getDailyFolderPath();
             File folder = new File(dailyFolder);
             if (folder.exists() && folder.isDirectory()) {
                 File[] reportFiles = folder.listFiles((dir, name) -> 
-                    name.startsWith("ExtentReport_") && name.endsWith(".html"));
-                if (reportFiles != null && reportFiles.length > 3) {
+                    name.startsWith("ERP_Report_") && name.endsWith(".html"));
+                if (reportFiles != null && reportFiles.length > 5) {
                     Arrays.sort(reportFiles, Comparator.comparingLong(File::lastModified));
-                    for (int i = 0; i < reportFiles.length - 3; i++) {
-                        reportFiles[i].delete();
+                    for (int i = 0; i < reportFiles.length - 5; i++) {
+                        boolean deleted = reportFiles[i].delete();
+                        if (deleted) {
+                            System.out.println("Deleted old report: " + reportFiles[i].getName());
+                        }
                     }
                 }
             }
@@ -106,12 +119,17 @@ public class ExtentReportManager {
 
     public static void createTest(String testName) {
         try {
-            ExtentTest extentTest = getInstance().createTest(testName);
+            // Ensure extent is initialized
+            getInstance();
+            
+            ExtentTest extentTest = extent.createTest(testName);
             test.set(extentTest);
             step.set(extentTest);
-            infoStep("Test Started: " + testName);
+            System.out.println("📋 Test created in Extent Report: " + testName);
+            
         } catch (Exception e) {
-            System.out.println("Error creating test: " + e.getMessage());
+            System.out.println("❌ Error creating test: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -119,9 +137,10 @@ public class ExtentReportManager {
         try {
             if (step.get() != null) {
                 step.get().log(Status.PASS, stepDescription);
+                System.out.println("✅ " + stepDescription);
             }
         } catch (Exception e) {
-            System.out.println("Error logging passed step: " + e.getMessage());
+            System.out.println("❌ Error logging passed step: " + e.getMessage());
         }
     }
 
@@ -129,9 +148,10 @@ public class ExtentReportManager {
         try {
             if (step.get() != null) {
                 step.get().log(Status.FAIL, stepDescription);
+                System.out.println("❌ " + stepDescription);
             }
         } catch (Exception e) {
-            System.out.println("Error logging failed step: " + e.getMessage());
+            System.out.println("❌ Error logging failed step: " + e.getMessage());
         }
     }
 
@@ -139,84 +159,33 @@ public class ExtentReportManager {
         try {
             if (step.get() != null) {
                 step.get().log(Status.INFO, stepDescription);
+                System.out.println("ℹ️ " + stepDescription);
             }
         } catch (Exception e) {
-            System.out.println("Error logging info step: " + e.getMessage());
+            System.out.println("❌ Error logging info step: " + e.getMessage());
         }
     }
 
-    // METHOD 1: Add screenshot using Base64 (RECOMMENDED - No file path issues)
     public static void addScreenshotBase64(String base64Screenshot) {
         try {
             if (test.get() != null && base64Screenshot != null) {
                 test.get().info(MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
-                System.out.println("Base64 screenshot added to report");
+                System.out.println("📸 Screenshot added to report (Base64)");
             }
         } catch (Exception e) {
-            System.out.println("Error adding Base64 screenshot: " + e.getMessage());
+            System.out.println("❌ Error adding Base64 screenshot: " + e.getMessage());
         }
     }
 
-    // METHOD 2: Add screenshot with title using Base64
     public static void addScreenshotBase64(String title, String base64Screenshot) {
         try {
             if (test.get() != null && base64Screenshot != null) {
                 test.get().info(title, 
                     MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
-                System.out.println("Base64 screenshot with title added: " + title);
+                System.out.println("📸 Screenshot added with title: " + title);
             }
         } catch (Exception e) {
-            System.out.println("Error adding Base64 screenshot with title: " + e.getMessage());
-        }
-    }
-
-    // METHOD 3: Add screenshot using file path (Fallback method)
-    public static void addScreenshot(String screenshotPath) {
-        try {
-            if (test.get() != null && screenshotPath != null) {
-                File screenshotFile = new File(screenshotPath);
-                if (screenshotFile.exists()) {
-                    // Use relative path from project root
-                    String relativePath = getRelativePath(screenshotPath);
-                    test.get().info(MediaEntityBuilder.createScreenCaptureFromPath(relativePath).build());
-                    System.out.println("Screenshot added via file path: " + relativePath);
-                } else {
-                    System.out.println("Screenshot file not found: " + screenshotPath);
-                    // Fallback to Base64 if file not found
-                    String base64Screenshot = BrowserUtils.getScreenshotAsBase64();
-                    if (base64Screenshot != null) {
-                        addScreenshotBase64(base64Screenshot);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error adding screenshot via file path: " + e.getMessage());
-            // Fallback to Base64
-            try {
-                String base64Screenshot = BrowserUtils.getScreenshotAsBase64();
-                if (base64Screenshot != null) {
-                    addScreenshotBase64(base64Screenshot);
-                }
-            } catch (Exception ex) {
-                System.out.println("Fallback screenshot also failed: " + ex.getMessage());
-            }
-        }
-    }
-
-    // Helper method to get relative path
-    private static String getRelativePath(String absolutePath) {
-        try {
-            if (absolutePath == null) return "";
-            File currentDir = new File(System.getProperty("user.dir"));
-            File file = new File(absolutePath);
-            
-            if (file.getAbsolutePath().startsWith(currentDir.getAbsolutePath())) {
-                return file.getAbsolutePath().substring(currentDir.getAbsolutePath().length() + 1)
-                          .replace("\\", "/");
-            }
-            return absolutePath;
-        } catch (Exception e) {
-            return absolutePath;
+            System.out.println("❌ Error adding Base64 screenshot with title: " + e.getMessage());
         }
     }
 
@@ -224,9 +193,10 @@ public class ExtentReportManager {
         try {
             if (test.get() != null) {
                 test.get().pass(MarkupHelper.createLabel(testDescription, ExtentColor.GREEN));
+                System.out.println("🎉 Test Passed: " + testDescription);
             }
         } catch (Exception e) {
-            System.out.println("Error marking test as passed: " + e.getMessage());
+            System.out.println("❌ Error marking test as passed: " + e.getMessage());
         }
     }
 
@@ -234,9 +204,10 @@ public class ExtentReportManager {
         try {
             if (test.get() != null) {
                 test.get().fail(MarkupHelper.createLabel(testDescription, ExtentColor.RED));
+                System.out.println("💥 Test Failed: " + testDescription);
             }
         } catch (Exception e) {
-            System.out.println("Error marking test as failed: " + e.getMessage());
+            System.out.println("❌ Error marking test as failed: " + e.getMessage());
         }
     }
 
@@ -244,14 +215,21 @@ public class ExtentReportManager {
         try {
             if (extent != null) {
                 extent.flush();
+                System.out.println("📊 Extent Report saved to: " + currentReportPath);
             }
         } catch (Exception e) {
-            System.out.println("Error ending test: " + e.getMessage());
+            System.out.println("❌ Error ending test: " + e.getMessage());
         }
     }
 
     public static String getCurrentReportPath() {
         return currentReportPath;
     }
-}
 
+    // Add this method to manually trigger report creation if needed
+    public static void initializeReport() {
+        if (extent == null) {
+            createInstance();
+        }
+    }
+}
