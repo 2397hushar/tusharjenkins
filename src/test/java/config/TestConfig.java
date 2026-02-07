@@ -2,16 +2,19 @@ package config;
 
 import java.time.Duration;
 
+import utilities.ConfigReader;
+
 public class TestConfig {
     
     // Browser Configuration - CHANGE THIS TO "chrome"
-    public static final String BROWSER = "chrome";  // Changed from "edge" to "chrome"
+	public static final String BROWSER = ConfigReader.getBrowser();
     
     // For Jenkins, set HEADLESS to true
-    public static final boolean HEADLESS = isJenkinsEnvironment(); // Auto-detect Jenkins
+    public static final boolean HEADLESS = ConfigReader.isHeadlesss(); // Auto-detect Jenkins
     
     public static final Duration IMPLICIT_WAIT = Duration.ofSeconds(10);
     public static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(20);
+    
     
     // Application URLs
     public static final String BASE_URL = "https://preprod-hubbleorion.hubblehox.com/";
@@ -39,9 +42,16 @@ public class TestConfig {
     }
     
     public static boolean isJenkinsEnvironment() {
-        return System.getenv("JENKINS_HOME") != null || 
-               System.getenv("BUILD_NUMBER") != null ||
-               "jenkins".equals(System.getProperty("environment"));
+        boolean isJenkins = System.getenv("JENKINS_HOME") != null || 
+                           System.getenv("BUILD_NUMBER") != null ||
+                           "jenkins".equals(System.getProperty("environment"));
+        
+        // Allow override via system property
+        if (System.getProperty("force.headless") != null) {
+            return Boolean.parseBoolean(System.getProperty("force.headless"));
+        }
+        
+        return isJenkins;
     }
     
     // Wait Configuration
