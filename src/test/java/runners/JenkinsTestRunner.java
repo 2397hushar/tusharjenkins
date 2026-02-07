@@ -11,8 +11,8 @@ public class JenkinsTestRunner {
         System.out.println("=========================================");
         
         // Set headless mode for Jenkins
-        System.setProperty("headless", "true");
-        System.setProperty("webdriver.chrome.silentOutput", "true");
+        System.setProperty("headless", "false");
+        System.setProperty("webdriver.chrome.silentOutput", "false");
         System.setProperty("webdriver.edge.silentOutput", "true");
         
         // Log environment info

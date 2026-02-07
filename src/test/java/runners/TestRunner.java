@@ -36,7 +36,7 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         
         // Set headless mode for Jenkins
         if (isJenkins) {
-            System.setProperty("headless", "true");
+            System.setProperty("headless", "false");
             System.out.println("✅ Headless mode enabled for Jenkins");
         }
         
