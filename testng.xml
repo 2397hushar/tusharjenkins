@@ -8,6 +8,7 @@
     <parameter name="headless" value="false"/>
     <classes>
       <class name="runners.TestRunner"/>
+      <class name="stepDefinitions.LoginStepsReportCard"/>
     </classes>
   </test>
 </suite>
