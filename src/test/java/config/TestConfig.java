@@ -35,6 +35,11 @@ public class TestConfig {
         public static final String PASSWORD = "L8XcljPmjmGea322";
     }
     
+    public static boolean isJenkinsEnvironment() {
+        return System.getenv("JENKINS_HOME") != null || 
+               System.getenv("BUILD_NUMBER") != null ||
+               "jenkins".equals(System.getProperty("environment"));
+    }
     // Wait Configuration
     public static class Waits {
         public static final Duration SHORT_WAIT = Duration.ofSeconds(5);
