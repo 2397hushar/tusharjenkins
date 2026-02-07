@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @CucumberOptions(
-    features = "src/test/resources/features/Reportcard.feature",
+    features = "src/test/java/Reportcard.feature",  // Direct path to your feature file
     glue = {"stepDefinitions", "ERP_Page"},
     plugin = {
         "pretty",
@@ -23,6 +23,8 @@ public class TestRunner extends AbstractTestNGCucumberTests {
     public Object[][] scenarios() {
         System.out.println("Initializing TestRunner...");
         System.out.println("Classpath: " + System.getProperty("java.class.path"));
+        System.out.println("Working Directory: " + System.getProperty("user.dir"));
+        System.out.println("Feature file path: src/test/java/Reportcard.feature");
         return super.scenarios();
     }
 
