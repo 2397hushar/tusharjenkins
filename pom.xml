@@ -127,6 +127,11 @@
 					  <suiteXmlFiles>
 						  <suiteXmlFile>testng.xml</suiteXmlFile>
 					  </suiteXmlFiles>
+					  
+					  <includes>
+  <include>**/TestRunner.java</include>
+  <include>**/JenkinsVerificationTest.java</include>
+</includes>
 				  </configuration>
        		 </plugin>
 			 
