@@ -57,7 +57,7 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         System.out.println("OS Version: " + System.getProperty("os.version"));
         System.out.println("Java Version: " + System.getProperty("java.version"));
         System.out.println("User Name: " + System.getProperty("user.name"));
-        System.out.println("Browser: " + System.getProperty("browser", "edge"));
+        System.out.println("Browser: " + System.getProperty("browser", "chrome"));
         System.out.println("Headless Mode: " + System.getProperty("headless", "false"));
         
         return super.scenarios();
