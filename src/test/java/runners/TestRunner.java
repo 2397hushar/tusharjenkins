@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @CucumberOptions(
-    features = "src/test/java/Reportcard.feature",  // Direct path to your feature file
+    features = "src/test/resources/Reportcard.feature",  // Direct path to your feature file
     glue = {"stepDefinitions", "ERP_Page"},
     plugin = {
         "pretty",
