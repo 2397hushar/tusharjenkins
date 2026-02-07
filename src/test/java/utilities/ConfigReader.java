@@ -275,16 +275,36 @@ public class ConfigReader {
     static {
         try {
             properties = new Properties();
+            
+            // First check if we're in Jenkins environment
+            boolean isJenkins = System.getenv("JENKINS_HOME") != null || 
+                               System.getenv("BUILD_NUMBER") != null;
+            
+            // Try to load appropriate config file
+            String configFile = isJenkins ? "jenkins.properties" : "config.properties";
+            System.out.println("🔧 Loading configuration from: " + configFile);
+            
             InputStream input = ConfigReader.class.getClassLoader()
-                    .getResourceAsStream("config.properties");
+                    .getResourceAsStream(configFile);
             
             if (input != null) {
                 properties.load(input);
                 input.close();
-                System.out.println("✅ Config properties loaded successfully");
+                System.out.println("✅ " + configFile + " loaded successfully");
             } else {
-                System.out.println("⚠️ Config file not found, using default values");
-                setDefaultProperties();
+                // If specific config not found, try the other one
+                configFile = isJenkins ? "config.properties" : "jenkins.properties";
+                input = ConfigReader.class.getClassLoader()
+                        .getResourceAsStream(configFile);
+                
+                if (input != null) {
+                    properties.load(input);
+                    input.close();
+                    System.out.println("✅ Fallback to " + configFile + " loaded successfully");
+                } else {
+                    System.out.println("⚠️ No config file found, using default values");
+                    setDefaultProperties();
+                }
             }
             
             // Initialize and validate JSON data
@@ -322,10 +342,21 @@ public class ConfigReader {
     
     // Basic property getters
     public static String getProperty(String key) {
-        return properties.getProperty(key);
+        String value = properties.getProperty(key);
+        if (value == null) {
+            System.out.println("⚠️ Property not found: " + key);
+            return "";
+        }
+        return value.trim();
     }
     
     public static String getBrowser() {
+        // Check for system property first (allows override)
+        String browser = System.getProperty("browser");
+        if (browser != null && !browser.trim().isEmpty()) {
+            System.out.println("Using browser from system property: " + browser);
+            return browser.toLowerCase();
+        }
         return getProperty("browser");
     }
     
@@ -341,7 +372,7 @@ public class ConfigReader {
         return getProperty("password");
     }
     
-    // JSON User Management Methods - These were missing
+    // JSON User Management Methods
     public static String getUserUsername(int index) {
         return JsonDataProvider.getUsername(index);
     }

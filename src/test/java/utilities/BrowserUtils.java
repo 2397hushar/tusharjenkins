@@ -41,7 +41,7 @@ public class BrowserUtils {
             
             driver.manage().window().maximize();
             driver.manage().timeouts().implicitlyWait(
-            	    Duration.ofSeconds(20)); // Increased to 20 seconds
+                Duration.ofSeconds(20)); // Increased to 20 seconds
         }
         return driver;
     }
@@ -50,50 +50,148 @@ public class BrowserUtils {
         try {
             ChromeOptions options = new ChromeOptions();
             
-            // Incognito mode
-            options.addArguments("--incognito");
+            // Check if running in Jenkins/headless environment
+            boolean isHeadless = isHeadlessEnvironment();
             
-            // Performance & Security
+            if (isHeadless) {
+                System.out.println("🚀 Running Chrome in HEADLESS mode for Jenkins/CI");
+                options.addArguments("--headless=new");
+                options.addArguments("--no-sandbox");
+                options.addArguments("--disable-dev-shm-usage");
+                options.addArguments("--disable-gpu");
+                options.addArguments("--window-size=1920,1080");
+                options.addArguments("--disable-software-rasterizer");
+                options.addArguments("--remote-allow-origins=*");
+            } else {
+                // Incognito mode for local execution
+                options.addArguments("--incognito");
+                options.addArguments("--start-maximized");
+            }
+            
+            // Common performance & security options
             options.addArguments("--disable-extensions");
             options.addArguments("--disable-notifications");
             options.addArguments("--disable-popup-blocking");
-            options.addArguments("--no-sandbox");
-            options.addArguments("--disable-dev-shm-usage");
-            
-            // Window settings
-            options.addArguments("--start-maximized");
             options.addArguments("--disable-infobars");
+            options.addArguments("--disable-blink-features=AutomationControlled");
             
             // Remove automation flags
             options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
             options.setExperimentalOption("useAutomationExtension", false);
             
-            io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
-            driver = new ChromeDriver(options);
-            System.out.println("✅ Chrome browser launched in INCOGNITO mode with enhanced settings");
+            // Set preferences for better performance
+            options.addArguments("--disable-web-security");
+            options.addArguments("--allow-running-insecure-content");
+            options.addArguments("--ignore-certificate-errors");
+            
+            // WebDriverManager setup
+            try {
+                io.github.bonigarcia.wdm.WebDriverManager.chromedriver().setup();
+                driver = new ChromeDriver(options);
+                System.out.println("✅ Chrome browser launched" + (isHeadless ? " in HEADLESS mode" : ""));
+            } catch (Exception e) {
+                System.out.println("⚠️ WebDriverManager failed, using system property");
+                // Fallback to system property
+                System.setProperty("webdriver.chrome.driver", getChromeDriverPath());
+                driver = new ChromeDriver(options);
+                System.out.println("✅ Chrome browser launched via system property" + (isHeadless ? " in HEADLESS mode" : ""));
+            }
             
         } catch (Exception e) {
-            // Fallback with basic options
-            System.setProperty("webdriver.chrome.driver", "C:\\Users\\Tushar Here\\selenium\\workselenium\\driver\\chromedriver.exe");
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--incognito");
-            options.addArguments("--start-maximized");
-            driver = new ChromeDriver(options);
-            System.out.println("✅ Chrome browser launched via local driver in INCOGNITO mode");
+            System.out.println("❌ Error setting up Chrome driver: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize Chrome driver", e);
         }
     }
+    
     private static void setupEdgeDriver() {
         try {
-            io.github.bonigarcia.wdm.WebDriverManager.edgedriver().setup();
-            driver = new EdgeDriver();
-            System.out.println("Edge browser launched via WebDriverManager");
-        } catch (Exception e) {
-            System.out.println("WebDriverManager failed, trying local Edge driver...");
-            System.setProperty("webdriver.edge.driver", "C:\\Users\\tushar.sangale\\Downloads\\UpdatedFrameworkChanges-master (1)\\UpdatedFrameworkChanges-master\\workselenium\\driver\\msedgedriver.exe");
             EdgeOptions options = new EdgeOptions();
+            
+            // Check if running in Jenkins/headless environment
+            boolean isHeadless = isHeadlessEnvironment();
+            
+            if (isHeadless) {
+                System.out.println("🚀 Running Edge in HEADLESS mode for Jenkins/CI");
+                options.addArguments("--headless=new");
+                options.addArguments("--no-sandbox");
+                options.addArguments("--disable-dev-shm-usage");
+                options.addArguments("--disable-gpu");
+                options.addArguments("--window-size=1920,1080");
+            } else {
+                // Private mode for local execution
+                options.addArguments("--inprivate");
+            }
+            
+            // Common options
             options.addArguments("--remote-allow-origins=*");
-            driver = new EdgeDriver(options);
-            System.out.println("Edge browser launched via local driver");
+            options.addArguments("--disable-extensions");
+            options.addArguments("--disable-notifications");
+            options.addArguments("--disable-popup-blocking");
+            
+            // WebDriverManager setup
+            try {
+                io.github.bonigarcia.wdm.WebDriverManager.edgedriver().setup();
+                driver = new EdgeDriver(options);
+                System.out.println("✅ Edge browser launched" + (isHeadless ? " in HEADLESS mode" : ""));
+            } catch (Exception e) {
+                System.out.println("⚠️ WebDriverManager failed, using system property");
+                // Fallback to system property
+                System.setProperty("webdriver.edge.driver", getEdgeDriverPath());
+                driver = new EdgeDriver(options);
+                System.out.println("✅ Edge browser launched via system property" + (isHeadless ? " in HEADLESS mode" : ""));
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Error setting up Edge driver: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to initialize Edge driver", e);
+        }
+    }
+    
+    // Check if running in headless/Jenkins environment
+    private static boolean isHeadlessEnvironment() {
+        // Check for Jenkins environment variables
+        boolean isJenkins = System.getenv("JENKINS_HOME") != null || 
+                           System.getenv("BUILD_NUMBER") != null ||
+                           System.getenv("JENKINS_URL") != null;
+        
+        // Check for headless system property
+        boolean isHeadlessProp = "true".equalsIgnoreCase(System.getProperty("headless"));
+        
+        // Check if running on server/CI (no display)
+        boolean isServer = System.getProperty("os.name").toLowerCase().contains("linux") && 
+                          System.getenv("DISPLAY") == null;
+        
+        System.out.println("Environment Check:");
+        System.out.println("  - Jenkins detected: " + isJenkins);
+        System.out.println("  - Headless property: " + isHeadlessProp);
+        System.out.println("  - Server/CI detected: " + isServer);
+        
+        return isJenkins || isHeadlessProp || isServer;
+    }
+    
+    // Get Chrome driver path
+    private static String getChromeDriverPath() {
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            return "C:\\Program Files\\chromedriver\\chromedriver.exe";
+        } else if (os.contains("linux")) {
+            return "/usr/bin/chromedriver";
+        } else {
+            return "/usr/local/bin/chromedriver";
+        }
+    }
+    
+    // Get Edge driver path
+    private static String getEdgeDriverPath() {
+        String os = System.getProperty("os.name").toLowerCase();
+        if (os.contains("win")) {
+            return "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedgedriver.exe";
+        } else if (os.contains("linux")) {
+            return "/usr/bin/msedgedriver";
+        } else {
+            return "/usr/local/bin/msedgedriver";
         }
     }
     
@@ -179,7 +277,8 @@ public class BrowserUtils {
             System.out.println("Error cleaning screenshots: " + e.getMessage());
         }
     }
- // Add this method to your BrowserUtils class
+    
+    // Add this method to your BrowserUtils class
     public static void verifyCurrentUrl(String expectedUrl) {
         WebDriverWait wait = new WebDriverWait(getDriver(), Duration.ofSeconds(10));
         wait.until(ExpectedConditions.urlContains(expectedUrl));
@@ -194,9 +293,14 @@ public class BrowserUtils {
     
     public static void quitDriver() {
         if (driver != null) {
-            driver.quit();
-            driver = null;
-            System.out.println("Browser closed");
+            try {
+                driver.quit();
+                System.out.println("✅ Browser closed successfully");
+            } catch (Exception e) {
+                System.out.println("⚠️ Error closing browser: " + e.getMessage());
+            } finally {
+                driver = null;
+            }
         }
     }
 }

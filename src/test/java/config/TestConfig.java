@@ -35,11 +35,30 @@ public class TestConfig {
         public static final String PASSWORD = "L8XcljPmjmGea322";
     }
     
+    // Enhanced Jenkins detection
     public static boolean isJenkinsEnvironment() {
-        return System.getenv("JENKINS_HOME") != null || 
-               System.getenv("BUILD_NUMBER") != null ||
-               "jenkins".equals(System.getProperty("environment"));
+        boolean jenkinsHome = System.getenv("JENKINS_HOME") != null;
+        boolean buildNumber = System.getenv("BUILD_NUMBER") != null;
+        boolean jenkinsUrl = System.getenv("JENKINS_URL") != null;
+        boolean jenkinsJobName = System.getenv("JOB_NAME") != null;
+        boolean jenkinsNodeName = System.getenv("NODE_NAME") != null;
+        boolean jenkinsMode = "jenkins".equals(System.getProperty("environment"));
+        boolean headlessProp = "true".equalsIgnoreCase(System.getProperty("headless"));
+        
+        boolean isJenkins = jenkinsHome || buildNumber || jenkinsUrl || jenkinsJobName || 
+                           jenkinsNodeName || jenkinsMode || headlessProp;
+        
+        if (isJenkins) {
+            System.out.println("✅ Jenkins environment detected:");
+            if (jenkinsHome) System.out.println("  - JENKINS_HOME: " + System.getenv("JENKINS_HOME"));
+            if (buildNumber) System.out.println("  - BUILD_NUMBER: " + System.getenv("BUILD_NUMBER"));
+            if (jenkinsJobName) System.out.println("  - JOB_NAME: " + System.getenv("JOB_NAME"));
+            if (jenkinsNodeName) System.out.println("  - NODE_NAME: " + System.getenv("NODE_NAME"));
+        }
+        
+        return isJenkins;
     }
+    
     // Wait Configuration
     public static class Waits {
         public static final Duration SHORT_WAIT = Duration.ofSeconds(5);
