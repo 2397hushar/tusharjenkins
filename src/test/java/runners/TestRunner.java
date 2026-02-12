@@ -8,7 +8,7 @@ import org.testng.annotations.BeforeClass;
 
 @CucumberOptions(
     features = "src/test/java/resources/Reportcard.feature",  // Direct path to your feature file
-    glue = {"stepDefinitions", "ERP_Page"},
+    glue = "stepdefinitions",
     plugin = {
         "pretty",
         "html:target/cucumber-reports-multiple.html",
