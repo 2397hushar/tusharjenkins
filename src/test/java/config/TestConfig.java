@@ -1,20 +1,18 @@
 package config;
 
 import java.time.Duration;
-
 import utilities.ConfigReader;
 
 public class TestConfig {
     
-    // Browser Configuration - CHANGE THIS TO "chrome"
-	public static final String BROWSER = ConfigReader.getBrowser();
+    // Browser Configuration
+    public static final String BROWSER = ConfigReader.getBrowser();
     
-    // For Jenkins, set HEADLESS to true
-    public static final boolean HEADLESS = ConfigReader.isHeadlesss(); // Auto-detect Jenkins
+    // Fix: Use correct method name (was isHeadlesss with triple s)
+    public static final boolean HEADLESS = ConfigReader.isHeadlesss(); // Fixed method name
     
     public static final Duration IMPLICIT_WAIT = Duration.ofSeconds(10);
     public static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(20);
-    
     
     // Application URLs
     public static final String BASE_URL = "https://preprod-hubbleorion.hubblehox.com/";
@@ -24,22 +22,13 @@ public class TestConfig {
     // Screenshot Configuration
     public static final String SCREENSHOT_PATH = System.getProperty("user.dir") + "/target/screenshots/";
     
-    // Extent Report Configuration - Use relative paths
+    // Extent Report Configuration
     public static final String EXTENT_REPORT_PATH = System.getProperty("user.dir") + "/target/extent-reports/";
     public static final String REPORT_NAME = "ERP Automation Report";
     public static final String DOCUMENT_TITLE = "ERP Test Results";
     
     public static final boolean TAKE_SCREENSHOT_ON_FAILURE = true;
     public static final boolean TAKE_SCREENSHOT_ON_SUCCESS = false;
-    
-    // Test Data
-    public static class Users {
-        public static final String STANDARD_USER = "ps1@vgos.org";
-        public static final String LOCKED_OUT_USER = "locked_out_user";
-        public static final String PROBLEM_USER = "problem_user";
-        public static final String PERFORMANCE_GLITCH_USER = "performance_glitch_user";
-        public static final String PASSWORD = "L8XcljPmjmGea322";
-    }
     
     public static boolean isJenkinsEnvironment() {
         boolean isJenkins = System.getenv("JENKINS_HOME") != null || 

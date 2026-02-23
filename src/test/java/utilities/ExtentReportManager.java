@@ -39,7 +39,7 @@ public class ExtentReportManager {
             // Clean old reports first
             cleanupOldReports();
             
-            // Generate daily folder path
+            // Generate daily folder path - FIXED: Use consistent folder naming
             String dailyFolder = getDailyFolderPath();
             
             // Create daily report directory if it doesn't exist
@@ -92,28 +92,42 @@ public class ExtentReportManager {
     // Method to clean old reports (keep only last 5 reports)
     private static void cleanupOldReports() {
         try {
-            String dailyFolder = getDailyFolderPath();
-            File folder = new File(dailyFolder);
-            if (folder.exists() && folder.isDirectory()) {
-                File[] reportFiles = folder.listFiles((dir, name) -> 
-                    name.startsWith("ERP_Report_") && name.endsWith(".html"));
-                if (reportFiles != null && reportFiles.length > 5) {
-                    Arrays.sort(reportFiles, Comparator.comparingLong(File::lastModified));
-                    for (int i = 0; i < reportFiles.length - 5; i++) {
-                        boolean deleted = reportFiles[i].delete();
-                        if (deleted) {
-                            System.out.println("Deleted old report: " + reportFiles[i].getName());
+            // FIXED: Use the same base path for cleanup
+            String basePath = TestConfig.EXTENT_REPORT_PATH;
+            File baseDir = new File(basePath);
+            
+            if (baseDir.exists() && baseDir.isDirectory()) {
+                // Get all date folders
+                File[] dateFolders = baseDir.listFiles(File::isDirectory);
+                
+                if (dateFolders != null) {
+                    for (File dateFolder : dateFolders) {
+                        // Clean up old report files in each date folder
+                        File[] reportFiles = dateFolder.listFiles((dir, name) -> 
+                            name.startsWith("ERP_Report_") && name.endsWith(".html"));
+                        
+                        if (reportFiles != null && reportFiles.length > 5) {
+                            Arrays.sort(reportFiles, Comparator.comparingLong(File::lastModified));
+                            for (int i = 0; i < reportFiles.length - 5; i++) {
+                                boolean deleted = reportFiles[i].delete();
+                                if (deleted) {
+                                    System.out.println("Deleted old report: " + reportFiles[i].getName());
+                                }
+                            }
                         }
                     }
                 }
             }
+            
         } catch (Exception e) {
             System.out.println("Error cleaning old reports: " + e.getMessage());
         }
     }
 
+    // FIXED: This is the key method - ensures consistent folder naming
     private static String getDailyFolderPath() {
         String dateFolder = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        // Use the configured path from TestConfig
         return TestConfig.EXTENT_REPORT_PATH + dateFolder + File.separator;
     }
 
@@ -226,7 +240,6 @@ public class ExtentReportManager {
         return currentReportPath;
     }
 
-    // Add this method to manually trigger report creation if needed
     public static void initializeReport() {
         if (extent == null) {
             createInstance();
