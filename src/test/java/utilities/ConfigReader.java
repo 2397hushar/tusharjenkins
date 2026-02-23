@@ -75,7 +75,7 @@ public class ConfigReader {
     
     private static void setDefaultProperties() {
         properties = new Properties();
-        properties.setProperty("browser", "chrome");  // Changed from edge to chrome
+        properties.setProperty("browser", "chrome");  // CHANGED: from edge to chrome
         properties.setProperty("url", "https://preprod-hubbleorion.hubblehox.com/");
         properties.setProperty("username", "swatipatil22@yahoo.com");
         properties.setProperty("password", "Swat@123");
