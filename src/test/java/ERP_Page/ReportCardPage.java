@@ -300,7 +300,7 @@ public class ReportCardPage extends BasePage {
     @FindBy(className = "report-card-container")
     private static WebElement reportCardContainer;
 
-    @FindBy(xpath = "(//*[@d='M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z'])[1]")
+    @FindBy(xpath = "(//*[@d='M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z'])[2]")
     private static WebElement downloadButton;
 
     @FindBy(className = "student-name")
