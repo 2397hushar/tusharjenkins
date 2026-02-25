@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Sauce Labs Tests",
+    "matchedStatuses": ["passed", "failed"]
+  },
+  {
+    "name": "ERP Tests",
+    "matchedStatuses": ["passed", "failed", "broken"]
+  },
+  {
+    "name": "Test Defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*AssertionError.*"
+  },
+  {
+    "name": "Environment Issues",
+    "matchedStatuses": ["broken"],
+    "messageRegex": ".*WebDriverException.*|.*TimeoutException.*"
+  }
+]

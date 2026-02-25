@@ -10,12 +10,14 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+
 import config.TestConfig;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.apache.commons.io.FileUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Attachment;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -142,6 +144,49 @@ public class BrowserUtils {
             throw e;
         }
     }
+    @Attachment(value = "{0}", type = "image/png")
+    public static byte[] takeScreenshotForAllure(String attachmentName) {
+        try {
+            if (driver instanceof TakesScreenshot) {
+                return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to take screenshot for Allure: " + e.getMessage());
+        }
+        return new byte[0];
+    }
+    
+    @Attachment(value = "Page Source", type = "text/html")
+    public static String getPageSource() {
+        try {
+            if (driver != null) {
+                return driver.getPageSource();
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to get page source: " + e.getMessage());
+        }
+        return "Page source not available";
+    }
+    
+    @Attachment(value = "Console Logs", type = "text/plain")
+    public static String getConsoleLogs() {
+        try {
+            // This is Chrome-specific, adjust for other browsers
+            if (driver instanceof org.openqa.selenium.chrome.ChromeDriver) {
+                return String.join("\n", 
+                    ((org.openqa.selenium.chrome.ChromeDriver) driver)
+                        .manage().logs().get("browser").getAll()
+                        .stream()
+                        .map(log -> log.toString())
+                        .collect(java.util.stream.Collectors.toList())
+                );
+            }
+        } catch (Exception e) {
+            System.out.println("Failed to get console logs: " + e.getMessage());
+        }
+        return "Console logs not available";
+    }
+
     
     private static boolean tryManualChromeDriver(ChromeOptions options) {
         try {

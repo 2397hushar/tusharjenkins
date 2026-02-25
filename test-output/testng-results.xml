@@ -1,17 +1,110 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testng-results ignored="0" total="1" passed="1" failed="0" skipped="0">
+<testng-results ignored="0" total="0" passed="0" failed="0" skipped="0">
   <reporter-output>
   </reporter-output>
-  <suite started-at="2026-02-06T18:44:34 IST" name="Default suite" finished-at="2026-02-06T18:44:34 IST" duration-ms="115">
+  <suite started-at="2026-02-25T15:10:33 IST" name="Default suite" finished-at="2026-02-25T15:10:34 IST" duration-ms="654">
     <groups>
+      <group name="cucumber">
+        <method signature="AbstractTestNGCucumberTests.runScenario(io.cucumber.testng.PickleWrapper,io.cucumber.testng.FeatureWrapper)[pri:0, instance:runners.TestRunner@3eb91815]" name="runScenario" class="io.cucumber.testng.AbstractTestNGCucumberTests"/>
+      </group> <!-- cucumber -->
     </groups>
-    <test started-at="2026-02-06T18:44:34 IST" name="Default test" finished-at="2026-02-06T18:44:34 IST" duration-ms="115">
-      <class name="runners.JenkinsVerificationTest">
-        <test-method signature="verifyJenkinsSetup()[pri:0, instance:runners.JenkinsVerificationTest@6743e411]" started-at="2026-02-06T18:44:34 IST" name="verifyJenkinsSetup" finished-at="2026-02-06T18:44:34 IST" duration-ms="28" status="PASS">
+    <test started-at="2026-02-25T15:10:33 IST" name="Default test" finished-at="2026-02-25T15:10:34 IST" duration-ms="654">
+      <class name="runners.TestRunner">
+        <test-method is-config="true" signature="setupSuite()[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:33 IST" name="setupSuite" finished-at="2026-02-25T15:10:33 IST" duration-ms="218" status="PASS">
           <reporter-output>
           </reporter-output>
-        </test-method> <!-- verifyJenkinsSetup -->
-      </class> <!-- runners.JenkinsVerificationTest -->
+        </test-method> <!-- setupSuite -->
+        <test-method is-config="true" signature="setUpClass(org.testng.ITestContext)[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:33 IST" name="setUpClass" finished-at="2026-02-25T15:10:33 IST" duration-ms="33" status="FAIL">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[org.testng.TestRunner@5ce33a58]]>
+              </value>
+            </param>
+          </params>
+          <exception class="java.lang.IllegalArgumentException">
+            <message>
+              <![CDATA[The plugin specification 'com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:' has a problem:
+
+Could not load plugin class 'com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter'.
+
+Plugin specifications should have the format of PLUGIN[:[PATH|[URI [OPTIONS]]]
+
+Valid values for PLUGIN are: html, json, junit, message, pretty, progress, rerun, summary, teamcity, testng, timeline, unused, usage
+
+PLUGIN can also be a fully qualified class name, allowing registration of 3rd party plugins. The 3rd party plugin must implement io.cucumber.plugin.Plugin]]>
+            </message>
+            <full-stacktrace>
+              <![CDATA[java.lang.IllegalArgumentException: The plugin specification 'com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:' has a problem:
+
+Could not load plugin class 'com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter'.
+
+Plugin specifications should have the format of PLUGIN[:[PATH|[URI [OPTIONS]]]
+
+Valid values for PLUGIN are: html, json, junit, message, pretty, progress, rerun, summary, teamcity, testng, timeline, unused, usage
+
+PLUGIN can also be a fully qualified class name, allowing registration of 3rd party plugins. The 3rd party plugin must implement io.cucumber.plugin.Plugin
+at io.cucumber.core.options.PluginOption.createCouldNotLoadClass(PluginOption.java:167)
+at io.cucumber.core.options.PluginOption.parsePluginName(PluginOption.java:145)
+at io.cucumber.core.options.PluginOption.parse(PluginOption.java:104)
+at io.cucumber.core.options.RuntimeOptionsBuilder.addPluginName(RuntimeOptionsBuilder.java:68)
+at io.cucumber.core.options.CucumberOptionsAnnotationParser.addPlugins(CucumberOptionsAnnotationParser.java:85)
+at io.cucumber.core.options.CucumberOptionsAnnotationParser.parse(CucumberOptionsAnnotationParser.java:39)
+at io.cucumber.testng.TestNGCucumberRunner.<init>(TestNGCucumberRunner.java:85)
+at io.cucumber.testng.AbstractTestNGCucumberTests.setUpClass(AbstractTestNGCucumberTests.java:27)
+at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+at org.testng.internal.invokers.MethodInvocationHelper.invokeMethod(MethodInvocationHelper.java:141)
+at org.testng.internal.invokers.MethodInvocationHelper.invokeMethodConsideringTimeout(MethodInvocationHelper.java:71)
+at org.testng.internal.invokers.ConfigInvoker.invokeConfigurationMethod(ConfigInvoker.java:400)
+at org.testng.internal.invokers.ConfigInvoker.invokeConfigurations(ConfigInvoker.java:333)
+at org.testng.internal.invokers.TestMethodWorker.invokeBeforeClassMethods(TestMethodWorker.java:188)
+at org.testng.internal.invokers.TestMethodWorker.run(TestMethodWorker.java:128)
+at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+at org.testng.TestRunner.privateRun(TestRunner.java:741)
+at org.testng.TestRunner.run(TestRunner.java:616)
+at org.testng.SuiteRunner.runTest(SuiteRunner.java:421)
+at org.testng.SuiteRunner.runSequentially(SuiteRunner.java:413)
+at org.testng.SuiteRunner.privateRun(SuiteRunner.java:373)
+at org.testng.SuiteRunner.run(SuiteRunner.java:312)
+at org.testng.SuiteRunnerWorker.runSuite(SuiteRunnerWorker.java:52)
+at org.testng.SuiteRunnerWorker.run(SuiteRunnerWorker.java:95)
+at org.testng.TestNG.runSuitesSequentially(TestNG.java:1274)
+at org.testng.TestNG.runSuitesLocally(TestNG.java:1208)
+at org.testng.TestNG.runSuites(TestNG.java:1112)
+at org.testng.TestNG.run(TestNG.java:1079)
+at org.testng.remote.AbstractRemoteTestNG.run(AbstractRemoteTestNG.java:115)
+at org.testng.remote.RemoteTestNG.initAndRun(RemoteTestNG.java:293)
+at org.testng.remote.RemoteTestNG.main(RemoteTestNG.java:91)
+Caused by: java.lang.ClassNotFoundException: com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter
+at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+at io.cucumber.core.options.PluginOption.parsePluginName(PluginOption.java:139)
+... 30 more
+]]>
+            </full-stacktrace>
+          </exception> <!-- java.lang.IllegalArgumentException -->
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setUpClass -->
+        <test-method is-config="true" signature="setup()[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:34 IST" name="setup" finished-at="2026-02-25T15:10:34 IST" duration-ms="0" status="SKIP">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method is-config="true" signature="teardown()[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:34 IST" name="teardown" finished-at="2026-02-25T15:10:34 IST" duration-ms="0" status="SKIP">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- teardown -->
+        <test-method is-config="true" signature="tearDownClass()[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:34 IST" name="tearDownClass" finished-at="2026-02-25T15:10:34 IST" duration-ms="2" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDownClass -->
+        <test-method is-config="true" signature="tearDownSuite()[pri:0, instance:runners.TestRunner@3eb91815]" started-at="2026-02-25T15:10:34 IST" name="tearDownSuite" finished-at="2026-02-25T15:10:34 IST" duration-ms="0" status="SKIP">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDownSuite -->
+      </class> <!-- runners.TestRunner -->
     </test> <!-- Default test -->
   </suite> <!-- Default suite -->
 </testng-results>

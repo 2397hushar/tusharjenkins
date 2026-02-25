@@ -8,7 +8,7 @@ import utilities.ExtentReportManager;
 
 public class Hooks {
     
-    @Before
+    @Before(order = 1)
     public void setUp(Scenario scenario) {
         System.out.println("=========================================");
         System.out.println("STARTING SCENARIO: " + scenario.getName());
@@ -17,9 +17,11 @@ public class Hooks {
         // Initialize Extent Report for this scenario
         ExtentReportManager.createTest(scenario.getName());
         ExtentReportManager.infoStep("Starting test execution for: " + scenario.getName());
+        
+        // REMOVED: AllureReportManager.logInfo call - Allure adapter handles this automatically
     }
     
-    @After
+    @After(order = 2)
     public void tearDown(Scenario scenario) {
         System.out.println("=========================================");
         System.out.println("COMPLETING SCENARIO: " + scenario.getName());
@@ -50,7 +52,7 @@ public class Hooks {
         BrowserUtils.quitDriver();
     }
     
-    @After
+    @After(order = 3)
     public void flushExtentReport() {
         // This ensures report is written at the end of all tests
         ExtentReportManager.endTest();

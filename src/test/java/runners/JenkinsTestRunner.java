@@ -11,7 +11,7 @@ public class JenkinsTestRunner {
         System.out.println("=========================================");
         
         // Set headless mode for Jenkins
-        System.setProperty("headless", "false");
+        System.setProperty("headless", "true");
         System.setProperty("webdriver.chrome.silentOutput", "false");
         System.setProperty("webdriver.edge.silentOutput", "true");
         
@@ -42,6 +42,24 @@ public class JenkinsTestRunner {
             System.out.println("Status: " + (exitCode == 0 ? "SUCCESS" : "FAILURE"));
             System.out.println("Exit Code: " + exitCode);
             System.out.println("=========================================");
+            
+            // Generate Allure report
+            try {
+                System.out.println("Generating Allure report...");
+                ProcessBuilder pb = new ProcessBuilder(
+                    "cmd", "/c", "allure generate target/allure-results --clean -o target/allure-report"
+                );
+                Process process = pb.start();
+                int allureExitCode = process.waitFor();
+                
+                if (allureExitCode == 0) {
+                    System.out.println("✅ Allure report generated successfully");
+                } else {
+                    System.out.println("⚠️ Allure report generation failed");
+                }
+            } catch (Exception e) {
+                System.out.println("⚠️ Error generating Allure report: " + e.getMessage());
+            }
             
             System.exit(exitCode);
         } catch (Exception e) {
