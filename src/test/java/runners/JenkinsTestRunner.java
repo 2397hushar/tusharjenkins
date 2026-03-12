@@ -43,23 +43,7 @@ public class JenkinsTestRunner {
             System.out.println("Exit Code: " + exitCode);
             System.out.println("=========================================");
             
-            // Generate Allure report
-            try {
-                System.out.println("Generating Allure report...");
-                ProcessBuilder pb = new ProcessBuilder(
-                    "cmd", "/c", "allure generate target/allure-results --clean -o target/allure-report"
-                );
-                Process process = pb.start();
-                int allureExitCode = process.waitFor();
-                
-                if (allureExitCode == 0) {
-                    System.out.println("✅ Allure report generated successfully");
-                } else {
-                    System.out.println("⚠️ Allure report generation failed");
-                }
-            } catch (Exception e) {
-                System.out.println("⚠️ Error generating Allure report: " + e.getMessage());
-            }
+            System.out.println("📊 Extent Report location: target/extent-reports/");
             
             System.exit(exitCode);
         } catch (Exception e) {

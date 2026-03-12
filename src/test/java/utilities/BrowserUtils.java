@@ -151,7 +151,7 @@ public class BrowserUtils {
                 return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
             }
         } catch (Exception e) {
-            System.out.println("Failed to take screenshot for Allure: " + e.getMessage());
+            System.out.println("Failed to take screenshot: " + e.getMessage());
         }
         return new byte[0];
     }
@@ -185,7 +185,47 @@ public class BrowserUtils {
             System.out.println("Failed to get console logs: " + e.getMessage());
         }
         return "Console logs not available";
+    }// Add these methods to your existing BrowserUtils class
+
+@Attachment(value = "{0} - Screenshot", type = "image/png")
+public static byte[] attachScreenshotToAllure(String attachmentName) {
+    try {
+        if (driver instanceof TakesScreenshot) {
+            return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+        }
+    } catch (Exception e) {
+        System.out.println("Failed to take screenshot for Allure: " + e.getMessage());
     }
+    return new byte[0];
+}
+
+@Attachment(value = "Page Source", type = "text/html")
+public static String attachPageSourceToAllure() {
+    try {
+        if (driver != null) {
+            return driver.getPageSource();
+        }
+    } catch (Exception e) {
+        System.out.println("Failed to get page source for Allure: " + e.getMessage());
+    }
+    return "Page source not available";
+}
+
+@Attachment(value = "Console Logs", type = "text/plain")
+public static String attachConsoleLogsToAllure() {
+    try {
+        if (driver instanceof org.openqa.selenium.chrome.ChromeDriver) {
+            return ((org.openqa.selenium.chrome.ChromeDriver) driver)
+                .manage().logs().get("browser").getAll()
+                .stream()
+                .map(log -> log.toString())
+                .collect(java.util.stream.Collectors.joining("\n"));
+        }
+    } catch (Exception e) {
+        System.out.println("Failed to get console logs for Allure: " + e.getMessage());
+    }
+    return "Console logs not available";
+}
 
     
     private static boolean tryManualChromeDriver(ChromeOptions options) {

@@ -1,0 +1,10 @@
+{
+  "name": "Jenkins",
+  "type": "jenkins",
+  "url": "http://localhost:8080/job/ERP-Tests/",
+  "buildOrder": 42,
+  "buildName": "ERP Automation #42",
+  "buildUrl": "http://localhost:8080/job/ERP-Tests/42/",
+  "reportUrl": "http://localhost:8080/job/ERP-Tests/42/allure/",
+  "reportName": "Allure Report"
+}

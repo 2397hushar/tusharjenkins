@@ -1,11 +1,19 @@
 [
   {
-    "name": "Sauce Labs Tests",
-    "matchedStatuses": ["passed", "failed"]
+    "name": "Passed Tests",
+    "matchedStatuses": ["passed"]
   },
   {
-    "name": "ERP Tests",
-    "matchedStatuses": ["passed", "failed", "broken"]
+    "name": "Failed Tests",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Broken Tests",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Skipped Tests",
+    "matchedStatuses": ["skipped"]
   },
   {
     "name": "Test Defects",
@@ -13,8 +21,13 @@
     "messageRegex": ".*AssertionError.*"
   },
   {
+    "name": "Product Defects",
+    "matchedStatuses": ["failed"],
+    "messageRegex": ".*expected.*but was.*"
+  },
+  {
     "name": "Environment Issues",
     "matchedStatuses": ["broken"],
-    "messageRegex": ".*WebDriverException.*|.*TimeoutException.*"
+    "messageRegex": ".*WebDriverException.*|.*TimeoutException.*|.*NoSuchElementException.*"
   }
 ]
