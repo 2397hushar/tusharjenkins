@@ -197,4 +197,9 @@ public class ConfigReader {
     public static String getTheme() {
         return getProperty("theme");
     }
+
+	public static boolean isHeadless() {
+		// TODO Auto-generated method stub
+	    return Boolean.parseBoolean(getProperty("headless"));
+	}
 }
