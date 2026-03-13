@@ -14,9 +14,9 @@ import utilities.ExtentReportManager;
     glue = {"stepDefinitions"},
     plugin = {
         "pretty",
-        "html:target/cucumber-reports-multiple.html",
-        "json:target/cucumber-multiple.json",
-        "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
+        "html:target/cucumber-reports.html",
+        "json:target/cucumber.json",
+       // "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
     },
     monochrome = true,
     tags = "@Regression"
@@ -42,7 +42,7 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         
         // Flush Extent Report
         ExtentReportManager.endTest();
-        System.out.println("📊 Extent Report saved at: " + ExtentReportManager.getCurrentReportPath());
+        System.out.println("✅ Extent Report saved at: " + ExtentReportManager.getCurrentReportPath());
     }
 
     @Override

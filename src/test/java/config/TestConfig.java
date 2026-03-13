@@ -9,7 +9,7 @@ public class TestConfig {
     public static final String BROWSER = ConfigReader.getBrowser();
     
     // Fix: Use correct method name (was isHeadlesss with triple s)
-    public static final boolean HEADLESS = ConfigReader.isHeadlesss(); // Fixed method name
+    public static final boolean HEADLESS = ConfigReader.isHeadless(); // Remove extra 's'
     
     public static final Duration IMPLICIT_WAIT = Duration.ofSeconds(10);
     public static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(20);

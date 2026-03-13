@@ -17,8 +17,6 @@ public class Hooks {
         // Initialize Extent Report for this scenario
         ExtentReportManager.createTest(scenario.getName());
         ExtentReportManager.infoStep("Starting test execution for: " + scenario.getName());
-        
-        // REMOVED: AllureReportManager.logInfo call - Allure adapter handles this automatically
     }
     
     @After(order = 2)
