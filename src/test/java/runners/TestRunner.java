@@ -16,7 +16,7 @@ import utilities.ExtentReportManager;
         "pretty",
         "html:target/cucumber-reports.html",
         "json:target/cucumber.json",
-       // "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
+        "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
     },
     monochrome = true
    // tags = "@Regression"

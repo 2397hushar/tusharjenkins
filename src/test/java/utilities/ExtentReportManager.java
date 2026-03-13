@@ -21,6 +21,7 @@ public class ExtentReportManager {
     private static ThreadLocal<ExtentTest> test = new ThreadLocal<>();
     private static ThreadLocal<ExtentTest> step = new ThreadLocal<>();
     private static String currentReportPath;
+    private static boolean isInitialized = false;
 
     // Initialize Extent Report at the start
     static {
@@ -39,7 +40,7 @@ public class ExtentReportManager {
             // Clean old reports first
             cleanupOldReports();
             
-            // Generate daily folder path - FIXED: Use consistent folder naming
+            // Generate daily folder path
             String dailyFolder = getDailyFolderPath();
             
             // Create daily report directory if it doesn't exist
@@ -79,7 +80,14 @@ public class ExtentReportManager {
             extent.setSystemInfo("URL", TestConfig.BASE_URL);
             extent.setSystemInfo("User", System.getProperty("user.name"));
             extent.setSystemInfo("Execution Time", new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date()));
+            
+            // Add Jenkins information if available
+            if (System.getenv("BUILD_NUMBER") != null) {
+                extent.setSystemInfo("Jenkins Build", System.getenv("BUILD_NUMBER"));
+                extent.setSystemInfo("Jenkins Job", System.getenv("JOB_NAME"));
+            }
 
+            isInitialized = true;
             System.out.println("✅ Extent Report initialized: " + reportPath);
             
         } catch (Exception e) {
@@ -92,7 +100,6 @@ public class ExtentReportManager {
     // Method to clean old reports (keep only last 5 reports)
     private static void cleanupOldReports() {
         try {
-            // FIXED: Use the same base path for cleanup
             String basePath = TestConfig.EXTENT_REPORT_PATH;
             File baseDir = new File(basePath);
             
@@ -124,10 +131,8 @@ public class ExtentReportManager {
         }
     }
 
-    // FIXED: This is the key method - ensures consistent folder naming
     private static String getDailyFolderPath() {
         String dateFolder = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        // Use the configured path from TestConfig
         return TestConfig.EXTENT_REPORT_PATH + dateFolder + File.separator;
     }
 
@@ -244,5 +249,9 @@ public class ExtentReportManager {
         if (extent == null) {
             createInstance();
         }
+    }
+    
+    public static boolean isReportInitialized() {
+        return isInitialized;
     }
 }
