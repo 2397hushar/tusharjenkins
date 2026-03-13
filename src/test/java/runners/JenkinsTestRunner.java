@@ -14,6 +14,8 @@ public class JenkinsTestRunner {
         System.setProperty("headless", "true");
         System.setProperty("webdriver.chrome.silentOutput", "false");
         System.setProperty("webdriver.edge.silentOutput", "true");
+        System.setProperty("extent.reporter.spark.start", "true");
+        System.setProperty("extent.reporter.spark.out", "target/extent-reports/");
         
         // Log environment info
         System.out.println("Environment Information:");
