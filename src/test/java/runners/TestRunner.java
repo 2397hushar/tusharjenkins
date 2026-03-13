@@ -18,8 +18,8 @@ import utilities.ExtentReportManager;
         "json:target/cucumber.json",
        // "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
     },
-    monochrome = true,
-    tags = "@Regression"
+    monochrome = true
+   // tags = "@Regression"
 )
 public class TestRunner extends AbstractTestNGCucumberTests {
 

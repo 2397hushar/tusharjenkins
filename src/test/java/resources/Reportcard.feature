@@ -13,6 +13,7 @@
   #  Then report card file should download successfully
   
   Feature: Report Cards Module Functionality with Multiple Users
+  @Regression  
 
   Scenario Outline: Complete report cards flow for student marksheet with different users
     Given I am on the application login page for user "<userType>"
