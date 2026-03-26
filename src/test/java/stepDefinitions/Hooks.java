@@ -16,7 +16,8 @@ public class Hooks {
         
         // Initialize Extent Report for this scenario
         ExtentReportManager.createTest(scenario.getName());
-        ExtentReportManager.infoStep("Starting test execution for: " + scenario.getName());
+        ExtentReportManager.infoStep("🚀 Starting test execution for: " + scenario.getName());
+        ExtentReportManager.infoStep("🔧 Scenario Tags: " + scenario.getSourceTagNames());
     }
     
     @After(order = 2)
@@ -28,21 +29,26 @@ public class Hooks {
         
         // Log scenario status to Extent Report
         if (scenario.isFailed()) {
-            ExtentReportManager.failStep("Scenario failed: " + scenario.getName());
+            ExtentReportManager.failStep("❌ Scenario failed: " + scenario.getName());
+            ExtentReportManager.infoStep("Failure Reason: " + getFailureReason(scenario));
             
             // Take screenshot on failure
             try {
                 String screenshot = BrowserUtils.takeScreenshotAsBase64("Failure_" + scenario.getName());
-                if (screenshot != null) {
-                    ExtentReportManager.addScreenshotBase64("Failure Screenshot", screenshot);
+                if (screenshot != null && !screenshot.isEmpty()) {
+                    ExtentReportManager.addScreenshotBase64("Failure Screenshot - " + scenario.getName(), screenshot);
+                    ExtentReportManager.infoStep("📸 Failure screenshot captured");
+                } else {
+                    ExtentReportManager.warningStep("Could not capture screenshot - returned null or empty");
                 }
             } catch (Exception e) {
+                ExtentReportManager.warningStep("Failed to capture screenshot: " + e.getMessage());
                 System.out.println("Failed to capture screenshot: " + e.getMessage());
             }
             
             ExtentReportManager.failTest("Test Case Failed: " + scenario.getName());
         } else {
-            ExtentReportManager.passStep("Scenario passed: " + scenario.getName());
+            ExtentReportManager.passStep("✅ Scenario passed: " + scenario.getName());
             ExtentReportManager.passTest("Test Case Passed: " + scenario.getName());
         }
         
@@ -53,6 +59,32 @@ public class Hooks {
     @After(order = 3)
     public void flushExtentReport() {
         // This ensures report is written at the end of all tests
-        ExtentReportManager.endTest();
+        System.out.println("=========================================");
+        System.out.println("FLUSHING EXTENT REPORT");
+        System.out.println("=========================================");
+        ExtentReportManager.flushReport();
+        System.out.println("✅ Extent Report flush completed");
+    }
+    
+    private String getFailureReason(Scenario scenario) {
+        if (scenario.isFailed()) {
+            Throwable error = getScenarioError(scenario);
+            if (error != null) {
+                return error.getMessage();
+            }
+            return "No error details available";
+        }
+        return "Not failed";
+    }
+    
+    private Throwable getScenarioError(Scenario scenario) {
+        try {
+            // Try to get the error using reflection
+            java.lang.reflect.Field field = scenario.getClass().getDeclaredField("error");
+            field.setAccessible(true);
+            return (Throwable) field.get(scenario);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

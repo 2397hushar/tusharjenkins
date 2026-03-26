@@ -22,6 +22,7 @@ public class ExtentReportManager {
     private static ThreadLocal<ExtentTest> step = new ThreadLocal<>();
     private static String currentReportPath;
     private static boolean isInitialized = false;
+    private static String currentTestName = "";
 
     // Initialize Extent Report at the start
     static {
@@ -141,6 +142,9 @@ public class ExtentReportManager {
             // Ensure extent is initialized
             getInstance();
             
+            // Store current test name
+            currentTestName = testName;
+            
             ExtentTest extentTest = extent.createTest(testName);
             test.set(extentTest);
             step.set(extentTest);
@@ -152,48 +156,47 @@ public class ExtentReportManager {
         }
     }
 
-    public static void passStep(String stepDescription) {
+    public static void logStep(String stepDescription, Status status) {
         try {
             if (step.get() != null) {
-                step.get().log(Status.PASS, stepDescription);
-                System.out.println("✅ " + stepDescription);
+                step.get().log(status, stepDescription);
+                System.out.println(getStatusSymbol(status) + " " + stepDescription);
+            } else {
+                System.out.println("⚠️ ExtentTest is null, cannot log step: " + stepDescription);
             }
         } catch (Exception e) {
-            System.out.println("❌ Error logging passed step: " + e.getMessage());
+            System.out.println("❌ Error logging step: " + e.getMessage());
         }
+    }
+    
+    private static String getStatusSymbol(Status status) {
+        switch(status) {
+            case PASS: return "✅";
+            case FAIL: return "❌";
+            case INFO: return "ℹ️";
+            case WARNING: return "⚠️";
+            default: return "📝";
+        }
+    }
+
+    public static void passStep(String stepDescription) {
+        logStep(stepDescription, Status.PASS);
     }
 
     public static void failStep(String stepDescription) {
-        try {
-            if (step.get() != null) {
-                step.get().log(Status.FAIL, stepDescription);
-                System.out.println("❌ " + stepDescription);
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Error logging failed step: " + e.getMessage());
-        }
+        logStep(stepDescription, Status.FAIL);
     }
 
     public static void infoStep(String stepDescription) {
-        try {
-            if (step.get() != null) {
-                step.get().log(Status.INFO, stepDescription);
-                System.out.println("ℹ️ " + stepDescription);
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Error logging info step: " + e.getMessage());
-        }
+        logStep(stepDescription, Status.INFO);
+    }
+
+    public static void warningStep(String stepDescription) {
+        logStep(stepDescription, Status.WARNING);
     }
 
     public static void addScreenshotBase64(String base64Screenshot) {
-        try {
-            if (test.get() != null && base64Screenshot != null) {
-                test.get().info(MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
-                System.out.println("📸 Screenshot added to report (Base64)");
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Error adding Base64 screenshot: " + e.getMessage());
-        }
+        addScreenshotBase64("Screenshot", base64Screenshot);
     }
 
     public static void addScreenshotBase64(String title, String base64Screenshot) {
@@ -202,6 +205,8 @@ public class ExtentReportManager {
                 test.get().info(title, 
                     MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
                 System.out.println("📸 Screenshot added with title: " + title);
+            } else if (test.get() == null) {
+                System.out.println("⚠️ Cannot add screenshot - test is null");
             }
         } catch (Exception e) {
             System.out.println("❌ Error adding Base64 screenshot with title: " + e.getMessage());
@@ -213,6 +218,8 @@ public class ExtentReportManager {
             if (test.get() != null) {
                 test.get().pass(MarkupHelper.createLabel(testDescription, ExtentColor.GREEN));
                 System.out.println("🎉 Test Passed: " + testDescription);
+            } else {
+                System.out.println("⚠️ Cannot mark test as passed - test is null");
             }
         } catch (Exception e) {
             System.out.println("❌ Error marking test as passed: " + e.getMessage());
@@ -224,6 +231,8 @@ public class ExtentReportManager {
             if (test.get() != null) {
                 test.get().fail(MarkupHelper.createLabel(testDescription, ExtentColor.RED));
                 System.out.println("💥 Test Failed: " + testDescription);
+            } else {
+                System.out.println("⚠️ Cannot mark test as failed - test is null");
             }
         } catch (Exception e) {
             System.out.println("❌ Error marking test as failed: " + e.getMessage());
@@ -235,9 +244,23 @@ public class ExtentReportManager {
             if (extent != null) {
                 extent.flush();
                 System.out.println("📊 Extent Report saved to: " + currentReportPath);
+                
+                // Also print the absolute path for easy access
+                File reportFile = new File(currentReportPath);
+                System.out.println("📊 Report absolute path: " + reportFile.getAbsolutePath());
+                
+                // Verify if report was actually created
+                if (reportFile.exists()) {
+                    System.out.println("✅ Report file created successfully! Size: " + reportFile.length() + " bytes");
+                } else {
+                    System.out.println("❌ Report file was not created!");
+                }
+            } else {
+                System.out.println("⚠️ Extent is null, cannot flush report");
             }
         } catch (Exception e) {
             System.out.println("❌ Error ending test: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -248,10 +271,16 @@ public class ExtentReportManager {
     public static void initializeReport() {
         if (extent == null) {
             createInstance();
+        } else {
+            System.out.println("✅ Extent Report already initialized");
         }
     }
     
     public static boolean isReportInitialized() {
         return isInitialized;
+    }
+    
+    public static void flushReport() {
+        endTest();
     }
 }

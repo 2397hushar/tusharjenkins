@@ -6,7 +6,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.AfterSuite;
 
-import utilities.ConfigReader;
 import utilities.ExtentReportManager;
 
 @CucumberOptions(
@@ -15,11 +14,12 @@ import utilities.ExtentReportManager;
     plugin = {
         "pretty",
         "html:target/cucumber-reports.html",
-        "json:target/cucumber.json",
-        "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
+        "json:target/cucumber.json"
+        // REMOVED: "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
+        // We're using custom ExtentReportManager instead
     },
-    monochrome = true
-   // tags = "@Regression"
+    monochrome = true,
+    tags = "@Regression"
 )
 public class TestRunner extends AbstractTestNGCucumberTests {
 
@@ -32,6 +32,7 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         // Initialize Extent Report
         ExtentReportManager.initializeReport();
         System.out.println("✅ Extent Report initialized successfully");
+        System.out.println("📊 Report will be saved in: target/extent-reports/");
     }
     
     @AfterSuite
@@ -40,9 +41,16 @@ public class TestRunner extends AbstractTestNGCucumberTests {
         System.out.println("FINALIZING EXTENT REPORTS");
         System.out.println("=========================================");
         
-        // Flush Extent Report
-        ExtentReportManager.endTest();
-        System.out.println("✅ Extent Report saved at: " + ExtentReportManager.getCurrentReportPath());
+        // Flush Extent Report - this is critical
+        ExtentReportManager.flushReport();
+        
+        String reportPath = ExtentReportManager.getCurrentReportPath();
+        if (reportPath != null && !reportPath.isEmpty()) {
+            System.out.println("✅ Extent Report saved at: " + reportPath);
+            System.out.println("📊 To view the report, open this file in a browser");
+        } else {
+            System.out.println("⚠️ Report path is null - report may not have been generated");
+        }
     }
 
     @Override
