@@ -23,8 +23,8 @@
     And I select current academic year from dropdown
     And I select a student from student dropdown
     When I click on View button for report card
-    Then I should see report card details page
-    When I click on Download button
+    Then I should see report card details page 
+    When I click on Download button 
     Then report card file should download successfully for "<userType>"
 
     Examples:

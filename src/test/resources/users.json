@@ -1,25 +1,25 @@
 {
   "users": [
     {
-      "username": "pawandeepsodhi@gmail.com",
-      "password": "Pawa@1234",
+      "username": "deepajakharia1985@gmail.com",
+      "password": "Deep@123",
       "description": "User 1"
     },
     {
-      "username": "pawandeepsodhi@gmail.com",
-      "password": "Pawa@1234", 
+      "username": "deepajakharia1985@gmail.com",
+      "password": "Deep@123", 
       "description": "User 2"
     },
     {
       
 	  
-	  "username": "pawandeepsodhi@gmail.com",
-	        "password": "Pawa@1234",
+	  "username": "deepajakharia1985@gmail.com",
+	        "password": "Deep@123",
 	        "description": "User 3"
     },
     {
-		"username": "pawandeepsodhi@gmail.com",
-		      "password": "Pawa@1234",
+		"username": "deepajakharia1985@gmail.com",
+		      "password": "Deep@123",
 		      "description": "User 4"
     }
   ]

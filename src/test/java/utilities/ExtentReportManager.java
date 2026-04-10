@@ -13,156 +13,82 @@ import config.TestConfig;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Arrays;
-import java.util.Comparator;
 
 public class ExtentReportManager {
     private static ExtentReports extent;
     private static ThreadLocal<ExtentTest> test = new ThreadLocal<>();
-    private static ThreadLocal<ExtentTest> step = new ThreadLocal<>();
     private static String currentReportPath;
-    private static boolean isInitialized = false;
-    private static String currentTestName = "";
 
-    // Initialize Extent Report at the start
-    static {
-        createInstance();
-    }
-
-    public static ExtentReports getInstance() {
+    public static synchronized void initializeReport() {
         if (extent == null) {
             createInstance();
         }
-        return extent;
     }
 
-    public static ExtentReports createInstance() {
+    public static synchronized ExtentReports createInstance() {
         try {
-            // Clean old reports first
-            cleanupOldReports();
-            
-            // Generate daily folder path
-            String dailyFolder = getDailyFolderPath();
-            
-            // Create daily report directory if it doesn't exist
-            File reportDir = new File(dailyFolder);
+            System.out.println("=========================================");
+            System.out.println("INITIALIZING EXTENT REPORT");
+            System.out.println("=========================================");
+
+            // ✅ Base directory
+            String baseDir = "target/extent-reports/";
+
+            // ✅ Create date folder (yyyy-MM-dd)
+            String dateFolder = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+            String fullDirPath = baseDir + dateFolder + "/";
+
+            File reportDir = new File(fullDirPath);
             if (!reportDir.exists()) {
-                boolean created = reportDir.mkdirs();
-                if (created) {
-                    System.out.println("✅ Created report directory: " + dailyFolder);
-                }
+                reportDir.mkdirs();
+                System.out.println("📁 Created directory: " + reportDir.getAbsolutePath());
             }
 
-            // Generate report file name with timestamp
+            // ✅ Screenshot folder inside date folder
+            String screenshotDirPath = fullDirPath + "screenshots/";
+            File screenshotDir = new File(screenshotDirPath);
+            if (!screenshotDir.exists()) {
+                screenshotDir.mkdirs();
+                System.out.println("📸 Created screenshot directory: " + screenshotDir.getAbsolutePath());
+            }
+
+            // ✅ Timestamp for file
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            String reportPath = dailyFolder + "ERP_Report_" + timeStamp + ".html";
+
+            // ✅ Final report path
+            String reportPath = fullDirPath + "ExtentReport_" + timeStamp + ".html";
             currentReportPath = reportPath;
 
+            System.out.println("📊 Report Path: " + new File(reportPath).getAbsolutePath());
+
             ExtentSparkReporter sparkReporter = new ExtentSparkReporter(reportPath);
-            
-            // Configure Spark reporter
             sparkReporter.config().setDocumentTitle(TestConfig.DOCUMENT_TITLE);
             sparkReporter.config().setReportName(TestConfig.REPORT_NAME);
             sparkReporter.config().setTheme(Theme.STANDARD);
-            sparkReporter.config().setEncoding("UTF-8");
-            sparkReporter.config().setTimeStampFormat("MMM dd, yyyy HH:mm:ss");
-            sparkReporter.config().setCss(".badge-primary {background-color: #2196F3;}");
 
             extent = new ExtentReports();
             extent.attachReporter(sparkReporter);
-            
-            // System information
-            extent.setSystemInfo("Organization", "Vibgyor Schools");
-            extent.setSystemInfo("Project", "ERP Automation");
-            extent.setSystemInfo("Environment", "Pre-Production");
-            extent.setSystemInfo("OS", System.getProperty("os.name"));
-            extent.setSystemInfo("Java Version", System.getProperty("java.version"));
-            extent.setSystemInfo("Browser", TestConfig.BROWSER.toUpperCase());
-            extent.setSystemInfo("URL", TestConfig.BASE_URL);
-            extent.setSystemInfo("User", System.getProperty("user.name"));
-            extent.setSystemInfo("Execution Time", new SimpleDateFormat("dd-MMM-yyyy HH:mm:ss").format(new Date()));
-            
-            // Add Jenkins information if available
-            if (System.getenv("BUILD_NUMBER") != null) {
-                extent.setSystemInfo("Jenkins Build", System.getenv("BUILD_NUMBER"));
-                extent.setSystemInfo("Jenkins Job", System.getenv("JOB_NAME"));
-            }
 
-            isInitialized = true;
-            System.out.println("✅ Extent Report initialized: " + reportPath);
-            
+            System.out.println("✅ Extent Report initialized");
+
         } catch (Exception e) {
-            System.out.println("❌ Error initializing Extent Report: " + e.getMessage());
             e.printStackTrace();
         }
         return extent;
     }
-
-    // Method to clean old reports (keep only last 5 reports)
-    private static void cleanupOldReports() {
-        try {
-            String basePath = TestConfig.EXTENT_REPORT_PATH;
-            File baseDir = new File(basePath);
-            
-            if (baseDir.exists() && baseDir.isDirectory()) {
-                // Get all date folders
-                File[] dateFolders = baseDir.listFiles(File::isDirectory);
-                
-                if (dateFolders != null) {
-                    for (File dateFolder : dateFolders) {
-                        // Clean up old report files in each date folder
-                        File[] reportFiles = dateFolder.listFiles((dir, name) -> 
-                            name.startsWith("ERP_Report_") && name.endsWith(".html"));
-                        
-                        if (reportFiles != null && reportFiles.length > 5) {
-                            Arrays.sort(reportFiles, Comparator.comparingLong(File::lastModified));
-                            for (int i = 0; i < reportFiles.length - 5; i++) {
-                                boolean deleted = reportFiles[i].delete();
-                                if (deleted) {
-                                    System.out.println("Deleted old report: " + reportFiles[i].getName());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        } catch (Exception e) {
-            System.out.println("Error cleaning old reports: " + e.getMessage());
+    public static synchronized void createTest(String testName) {
+        if (extent == null) {
+            initializeReport();   // ✅ ensures report starts
         }
-    }
-
-    private static String getDailyFolderPath() {
-        String dateFolder = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        return TestConfig.EXTENT_REPORT_PATH + dateFolder + File.separator;
-    }
-
-    public static void createTest(String testName) {
-        try {
-            // Ensure extent is initialized
-            getInstance();
-            
-            // Store current test name
-            currentTestName = testName;
-            
-            ExtentTest extentTest = extent.createTest(testName);
-            test.set(extentTest);
-            step.set(extentTest);
-            System.out.println("📋 Test created in Extent Report: " + testName);
-            
-        } catch (Exception e) {
-            System.out.println("❌ Error creating test: " + e.getMessage());
-            e.printStackTrace();
-        }
+        test.set(extent.createTest(testName));
     }
 
     public static void logStep(String stepDescription, Status status) {
         try {
-            if (step.get() != null) {
-                step.get().log(status, stepDescription);
+            ExtentTest currentTest = test.get();
+            if (currentTest != null) {
+                currentTest.log(status, stepDescription);
                 System.out.println(getStatusSymbol(status) + " " + stepDescription);
-            } else {
-                System.out.println("⚠️ ExtentTest is null, cannot log step: " + stepDescription);
             }
         } catch (Exception e) {
             System.out.println("❌ Error logging step: " + e.getMessage());
@@ -195,72 +121,51 @@ public class ExtentReportManager {
         logStep(stepDescription, Status.WARNING);
     }
 
+    public static void addScreenshotBase64(String title, String base64Screenshot) {
+        try {
+            ExtentTest currentTest = test.get();
+            if (currentTest != null && base64Screenshot != null && !base64Screenshot.isEmpty()) {
+                currentTest.info(title, MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
+                System.out.println("📸 Screenshot attached: " + title);
+            }
+        } catch (Exception e) {
+            System.out.println("❌ Error adding screenshot: " + e.getMessage());
+        }
+    }
+
     public static void addScreenshotBase64(String base64Screenshot) {
         addScreenshotBase64("Screenshot", base64Screenshot);
     }
 
-    public static void addScreenshotBase64(String title, String base64Screenshot) {
-        try {
-            if (test.get() != null && base64Screenshot != null) {
-                test.get().info(title, 
-                    MediaEntityBuilder.createScreenCaptureFromBase64String(base64Screenshot).build());
-                System.out.println("📸 Screenshot added with title: " + title);
-            } else if (test.get() == null) {
-                System.out.println("⚠️ Cannot add screenshot - test is null");
-            }
-        } catch (Exception e) {
-            System.out.println("❌ Error adding Base64 screenshot with title: " + e.getMessage());
-        }
-    }
-
     public static void passTest(String testDescription) {
         try {
-            if (test.get() != null) {
-                test.get().pass(MarkupHelper.createLabel(testDescription, ExtentColor.GREEN));
-                System.out.println("🎉 Test Passed: " + testDescription);
-            } else {
-                System.out.println("⚠️ Cannot mark test as passed - test is null");
+            ExtentTest currentTest = test.get();
+            if (currentTest != null) {
+                currentTest.pass(MarkupHelper.createLabel(testDescription, ExtentColor.GREEN));
             }
         } catch (Exception e) {
-            System.out.println("❌ Error marking test as passed: " + e.getMessage());
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 
     public static void failTest(String testDescription) {
         try {
-            if (test.get() != null) {
-                test.get().fail(MarkupHelper.createLabel(testDescription, ExtentColor.RED));
-                System.out.println("💥 Test Failed: " + testDescription);
-            } else {
-                System.out.println("⚠️ Cannot mark test as failed - test is null");
+            ExtentTest currentTest = test.get();
+            if (currentTest != null) {
+                currentTest.fail(MarkupHelper.createLabel(testDescription, ExtentColor.RED));
             }
         } catch (Exception e) {
-            System.out.println("❌ Error marking test as failed: " + e.getMessage());
+            System.out.println("❌ Error: " + e.getMessage());
         }
     }
 
     public static void endTest() {
         try {
-            if (extent != null) {
-                extent.flush();
-                System.out.println("📊 Extent Report saved to: " + currentReportPath);
-                
-                // Also print the absolute path for easy access
-                File reportFile = new File(currentReportPath);
-                System.out.println("📊 Report absolute path: " + reportFile.getAbsolutePath());
-                
-                // Verify if report was actually created
-                if (reportFile.exists()) {
-                    System.out.println("✅ Report file created successfully! Size: " + reportFile.length() + " bytes");
-                } else {
-                    System.out.println("❌ Report file was not created!");
-                }
-            } else {
-                System.out.println("⚠️ Extent is null, cannot flush report");
+            if (test.get() != null) {
+                test.remove();
             }
         } catch (Exception e) {
-            System.out.println("❌ Error ending test: " + e.getMessage());
-            e.printStackTrace();
+            // Ignore
         }
     }
 
@@ -268,19 +173,47 @@ public class ExtentReportManager {
         return currentReportPath;
     }
 
-    public static void initializeReport() {
-        if (extent == null) {
-            createInstance();
-        } else {
-            System.out.println("✅ Extent Report already initialized");
+    public static synchronized void flushReport() {
+        try {
+            System.out.println("=========================================");
+            System.out.println("FLUSHING EXTENT REPORT");
+            System.out.println("=========================================");
+            
+            if (extent != null) {
+                extent.flush();
+                System.out.println("✅ Extent.flush() completed");
+                
+                if (currentReportPath != null) {
+                    File reportFile = new File(currentReportPath);
+                    if (reportFile.exists()) {
+                        System.out.println("✅ REPORT GENERATED SUCCESSFULLY!");
+                        System.out.println("📍 Location: " + reportFile.getAbsolutePath());
+                        System.out.println("📏 Size: " + reportFile.length() + " bytes");
+                    } else {
+                        System.out.println("❌ Report file not found!");
+                        System.out.println("   Expected at: " + reportFile.getAbsolutePath());
+                        
+                        // Check if target directory exists
+                        File targetDir = new File("target");
+                        if (targetDir.exists()) {
+                            System.out.println("   target directory exists");
+                            File[] files = targetDir.listFiles();
+                            System.out.println("   Files in target:");
+                            for (File f : files) {
+                                if (f.getName().contains("Extent") || f.getName().contains("Report")) {
+                                    System.out.println("     - " + f.getName());
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                System.out.println("❌ Extent is null!");
+            }
+            System.out.println("=========================================");
+        } catch (Exception e) {
+            System.out.println("❌ Error flushing report: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-    
-    public static boolean isReportInitialized() {
-        return isInitialized;
-    }
-    
-    public static void flushReport() {
-        endTest();
     }
 }
