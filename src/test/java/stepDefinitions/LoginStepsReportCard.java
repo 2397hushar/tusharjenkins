@@ -391,7 +391,7 @@ public class LoginStepsReportCard {
             System.out.println("📥 Starting download verification for: " + currentUserDescription);
             ExtentReportManager.infoStep("Starting download verification");
             
-            boolean isDownloaded = reportCardsPage.verifyFileDownloadWithRetry();
+            boolean isDownloaded = reportCardsPage.verifyAnnualReportCardDownloadWithRetry();
             
             if (isDownloaded) {
                 System.out.println("✅ Download SUCCESSFUL for: " + currentUserDescription);

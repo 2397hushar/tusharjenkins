@@ -31,7 +31,7 @@ public class MarksheetPage extends BasePage {
 	@FindBy(className = "report-card-item")
 	private List<WebElement> reportCards;
 
-	@FindBy(xpath = "(//*[local-name()='path' and starts-with(@d, 'M12 4.5C7')])[2]")
+	@FindBy(xpath = "(//button[@aria-label='View'])")
 	private static WebElement viewButton;
 
 	// New locators for dropdown selections

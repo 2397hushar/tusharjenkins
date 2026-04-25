@@ -278,6 +278,7 @@
 
 package ERP_Page;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -300,7 +301,7 @@ public class ReportCardPage extends BasePage {
     @FindBy(className = "report-card-container")
     private static WebElement reportCardContainer;
 
-    @FindBy(xpath = "(//*[@d='M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z'])[2]")
+    @FindBy(xpath = "(//button[@aria-label='Download'])")
     private static WebElement downloadButton;
 
     @FindBy(className = "student-name")
@@ -309,7 +310,7 @@ public class ReportCardPage extends BasePage {
     @FindBy(className = "grades-table")
     private static WebElement gradesTable;
     
-    @FindBy(xpath  = "//*[@data-testid='ExpandMoreIcon']")
+    @FindBy(xpath = "//*[@data-testid='ExpandMoreIcon']")
     private static WebElement viewLogout;
     
     @FindBy(xpath = "//*[contains(text(), 'Logout')]")
@@ -326,11 +327,9 @@ public class ReportCardPage extends BasePage {
         try {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
-            // Wait for any of the title or URL conditions to be true
             wait.until(driver -> {
                 String title = driver.getTitle().toLowerCase();
                 String currentUrl = driver.getCurrentUrl().toLowerCase();
-                // Check if either title or URL contains relevant keywords
                 return title.contains("report card") || title.contains("progress report")
                         || title.contains("skill observation") || currentUrl.contains("report")
                         || currentUrl.contains("progress") || currentUrl.contains("skill");
@@ -347,7 +346,7 @@ public class ReportCardPage extends BasePage {
     }
     
     public static void logout_page() {
-    	try {
+        try {
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
             
             System.out.println("Starting logout process");
@@ -355,26 +354,21 @@ public class ReportCardPage extends BasePage {
             Thread.sleep(3000);
             logoutButton.click();
             System.out.println("Logout completed successfully!");
-    	}
-    	catch (Exception e) {
+        } catch (Exception e) {
             System.out.println("❌ Error during logout: " + e.getMessage());
             throw new RuntimeException("Failed to logout", e);
         }
     }
 
-    // Method to switch back to the original tab (marksheet page)
     public void switchBackToMarksheetTab() {
         try {
             ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
             System.out.println("Number of tabs open: " + tabs.size());
             
             if (tabs.size() > 1) {
-                // Switch back to the first tab (marksheet page)
                 driver.switchTo().window(tabs.get(0));
                 System.out.println("Switched back to marksheet tab");
                 System.out.println("Current URL: " + driver.getCurrentUrl());
-                
-                // Wait for page to stabilize
                 Thread.sleep(2000);
             }
             
@@ -384,21 +378,16 @@ public class ReportCardPage extends BasePage {
         }
     }
 
-    // Method to close the report card tab
     public void closeReportCardTab() {
         try {
             ArrayList<String> tabs = new ArrayList<>(driver.getWindowHandles());
             
             if (tabs.size() > 1) {
-                // Switch to report card tab and close it
                 driver.switchTo().window(tabs.get(1));
                 driver.close();
                 System.out.println("Closed report card tab");
-                
-                // Switch back to marksheet tab
                 driver.switchTo().window(tabs.get(0));
                 System.out.println("Switched back to marksheet tab");
-                
                 Thread.sleep(2000);
             }
             
@@ -416,19 +405,25 @@ public class ReportCardPage extends BasePage {
     }
 
     public static boolean isContentReadable() {
-        // Check if critical elements are visible and contain text
         return !studentName.getText().isEmpty() && gradesTable.isDisplayed() && reportCardContainer.isEnabled();
     }
 
     public static void clickDownloadButton() {
         try {
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-            WebElement downloadBtn = wait.until(ExpectedConditions.elementToBeClickable(downloadButton));
-            downloadBtn.click();
-            System.out.println("Download button clicked on marksheet page");
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+            System.out.println("Looking for Download button...");
             
-            // Reduced wait time for download to start
-            Thread.sleep(3000); // Reduced from 5000 to 3000
+            WebElement downloadBtn = wait.until(ExpectedConditions.elementToBeClickable(downloadButton));
+            System.out.println("Download button found and clickable");
+            
+            // Scroll to element before clicking
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", downloadBtn);
+            Thread.sleep(500);
+            
+            downloadBtn.click();
+            System.out.println("✅ Download button clicked for Annual Report Card");
+            
+            Thread.sleep(3000);
             
         } catch (Exception e) {
             System.out.println("Error clicking download button: " + e.getMessage());
@@ -436,271 +431,161 @@ public class ReportCardPage extends BasePage {
         }
     }
     
-    // Fast download verification method for regular files
-    public boolean verifyFileDownloadQuick() {
+    // Method to verify Annual Report Card download
+    public boolean verifyAnnualReportCardDownload() {
         try {
             String downloadPath = System.getProperty("user.home") + "/Downloads/";
             File downloadDir = new File(downloadPath);
             
-            System.out.println("Quick download verification in: " + downloadPath);
-            
-            // Reduced timeout for quicker verification
-            long startTime = System.currentTimeMillis();
-            long timeout = 15000; // Reduced from 30s to 15s
-            boolean fileDownloaded = false;
-            
-            while (System.currentTimeMillis() - startTime < timeout && !fileDownloaded) {
-                // Check every 2 seconds instead of 3
-                Thread.sleep(2000);
-                
-                File[] allFiles = downloadDir.listFiles();
-                if (allFiles != null) {
-                    // Sort files by last modified to check newest first
-                    Arrays.sort(allFiles, Comparator.comparingLong(File::lastModified).reversed());
-                    
-                    for (File file : allFiles) {
-                        if (file.isFile() && isTargetFile(file)) {
-                            fileDownloaded = true;
-                            System.out.println("✓ File downloaded successfully: " + file.getName());
-                            System.out.println("✓ File size: " + file.length() + " bytes");
-                            System.out.println("✓ File path: " + file.getAbsolutePath());
-                            break;
-                        }
-                    }
-                }
-                
-                if (fileDownloaded) {
-                    break;
-                } else {
-                    System.out.println("Checking for downloaded file... (" + 
-                        (System.currentTimeMillis() - startTime) / 1000 + "s elapsed)");
-                }
-            }
-            
-            if (!fileDownloaded) {
-                System.out.println("⚠ Quick verification timeout - trying extended verification for periodic tests");
-                return verifyPeriodicTestDownload();
-            }
-            
-            return fileDownloaded;
-            
-        } catch (Exception e) {
-            System.out.println("Error in quick download verification: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    // Special verification for Periodic Test files that take longer
-    private boolean verifyPeriodicTestDownload() {
-        try {
-            String downloadPath = System.getProperty("user.home") + "/Downloads/";
-            File downloadDir = new File(downloadPath);
-            
-            System.out.println("Extended verification for Periodic Test files...");
+            System.out.println("=========================================");
+            System.out.println("VERIFYING ANNUAL REPORT CARD DOWNLOAD");
+            System.out.println("=========================================");
+            System.out.println("Download directory: " + downloadPath);
             
             long startTime = System.currentTimeMillis();
-            long timeout = 25000; // 25 seconds max for periodic tests
+            long timeout = 35000; // 35 seconds for annual report card
             boolean fileDownloaded = false;
+            File downloadedFile = null;
             
             while (System.currentTimeMillis() - startTime < timeout && !fileDownloaded) {
                 Thread.sleep(3000);
                 
                 File[] allFiles = downloadDir.listFiles();
                 if (allFiles != null) {
+                    // Sort by last modified to get newest first
                     Arrays.sort(allFiles, Comparator.comparingLong(File::lastModified).reversed());
                     
                     for (File file : allFiles) {
-                        if (file.isFile() && isPeriodicTestFile(file)) {
+                        if (file.isFile() && isAnnualReportCardFile(file)) {
                             fileDownloaded = true;
-                            System.out.println("✓ Periodic Test file downloaded: " + file.getName());
-                            System.out.println("✓ File size: " + file.length() + " bytes");
-                            System.out.println("✓ Download time: " + 
-                                (System.currentTimeMillis() - startTime) / 1000 + "s");
+                            downloadedFile = file;
                             break;
                         }
                     }
                 }
                 
                 if (!fileDownloaded) {
-                    System.out.println("Still waiting for Periodic Test file... (" + 
+                    System.out.println("Waiting for Annual Report Card download... (" + 
                         (System.currentTimeMillis() - startTime) / 1000 + "s elapsed)");
                 }
             }
             
-            return fileDownloaded;
+            if (fileDownloaded && downloadedFile != null) {
+                System.out.println("=========================================");
+                System.out.println("✅ ANNUAL REPORT CARD DOWNLOADED SUCCESSFULLY!");
+                System.out.println("=========================================");
+                System.out.println("📄 File Name: " + downloadedFile.getName());
+                System.out.println("📏 File Size: " + downloadedFile.length() + " bytes");
+                System.out.println("📁 File Path: " + downloadedFile.getAbsolutePath());
+                System.out.println("🕐 Download Time: " + (System.currentTimeMillis() - startTime) / 1000 + " seconds");
+                System.out.println("=========================================");
+                return true;
+            } else {
+                System.out.println("=========================================");
+                System.out.println("❌ ANNUAL REPORT CARD NOT FOUND!");
+                System.out.println("=========================================");
+                System.out.println("Timeout reached: " + timeout / 1000 + " seconds");
+                
+                // List recent PDF files for debugging
+                File[] recentPdfs = downloadDir.listFiles((dir, name) -> 
+                    name.toLowerCase().endsWith(".pdf") && 
+                    (System.currentTimeMillis() - new File(dir, name).lastModified()) < 120000);
+                
+                if (recentPdfs != null && recentPdfs.length > 0) {
+                    System.out.println("\nRecent PDF files found in download directory:");
+                    for (File pdf : recentPdfs) {
+                        System.out.println("  - " + pdf.getName() + " (Size: " + pdf.length() + " bytes, Modified: " + 
+                            (System.currentTimeMillis() - pdf.lastModified()) / 1000 + "s ago)");
+                    }
+                } else {
+                    System.out.println("No recent PDF files found in download directory");
+                }
+                
+                return false;
+            }
             
         } catch (Exception e) {
-            System.out.println("Error in periodic test verification: " + e.getMessage());
+            System.out.println("Error verifying Annual Report Card download: " + e.getMessage());
             return false;
         }
     }
     
-    // Check if file is a target report card file
-    private boolean isTargetFile(File file) {
+    // Method to check if file is an Annual Report Card
+    private boolean isAnnualReportCardFile(File file) {
         String fileName = file.getName().toLowerCase();
         
-        // Check if it's a PDF with content
+        // Check if it's a PDF
         boolean isPdf = fileName.endsWith(".pdf");
-        boolean isRecent = (System.currentTimeMillis() - file.lastModified()) < 30000; // 30 seconds
-        boolean hasContent = file.length() > 1024; // At least 1KB
-        
-        if (!isPdf || !isRecent || !hasContent) {
+        if (!isPdf) {
             return false;
         }
         
-        // Target file patterns - prioritize these
-        String[] priorityPatterns = {
-            "skill observation", "sail observation", "observation",
-            "progress report", "report card", "marksheet"
+        // Check if file was downloaded recently (within 60 seconds)
+        boolean isRecent = (System.currentTimeMillis() - file.lastModified()) < 60000;
+        if (!isRecent) {
+            return false;
+        }
+        
+        // Check if file has content (at least 10KB for annual report card)
+        boolean hasContent = file.length() > 10240; // 10KB minimum
+        if (!hasContent) {
+            System.out.println("  File found but too small: " + file.getName() + " (" + file.length() + " bytes)");
+            return false;
+        }
+        
+        // Patterns for Annual Report Card
+        String[] annualReportPatterns = {
+            "annual report", "annual report card", "annual", "yearly report",
+            "report card", "progress report", "reportcard", "annual-report",
+            "yearly", "annual_report", "report-card", "progress"
         };
         
-        for (String pattern : priorityPatterns) {
+        for (String pattern : annualReportPatterns) {
             if (fileName.contains(pattern)) {
+                System.out.println("  ✓ Matched pattern: '" + pattern + "'");
                 return true;
             }
+        }
+        
+        // If no specific pattern matches but it's a recent PDF with good size, consider it
+        if (file.length() > 20480) { // > 20KB
+            System.out.println("  ✓ Large PDF file found (no pattern match): " + fileName);
+            return true;
         }
         
         return false;
     }
     
-    // Check if file is a Periodic Test file
-    private boolean isPeriodicTestFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        
-        boolean isPdf = fileName.endsWith(".pdf");
-        boolean isRecent = (System.currentTimeMillis() - file.lastModified()) < 45000; // 45 seconds
-        boolean hasContent = file.length() > 1024;
-        
-        if (!isPdf || !isRecent || !hasContent) {
-            return false;
-        }
-        
-        // Periodic Test file patterns
-        String[] periodicPatterns = {
-            "periodic test", "periodic", "test", "exam", "assessment"
-        };
-        
-        for (String pattern : periodicPatterns) {
-            if (fileName.contains(pattern)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    // Smart download verification that adapts to file type
-    public boolean verifyFileDownloadWithRetry() {
-        int maxRetries = 1; // Reduced from 2 to 1
+    // Main method to verify annual report card download
+    public boolean verifyAnnualReportCardDownloadWithRetry() {
+        int maxRetries = 2;
         int retryCount = 0;
         
+        System.out.println("=========================================");
+        System.out.println("STARTING ANNUAL REPORT CARD VERIFICATION");
+        System.out.println("=========================================");
+        
         while (retryCount <= maxRetries) {
-            System.out.println("Download verification attempt: " + (retryCount + 1));
+            System.out.println("\nVerification attempt: " + (retryCount + 1));
             
-            if (verifyFileDownloadQuick()) {
+            if (verifyAnnualReportCardDownload()) {
                 return true;
             }
             
             retryCount++;
             if (retryCount <= maxRetries) {
+                System.out.println("Retrying verification in 5 seconds...");
                 try {
-                    Thread.sleep(3000); // Reduced from 5000 to 3000
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
         }
         
+        System.out.println("\n=========================================");
+        System.out.println("❌ ANNUAL REPORT CARD VERIFICATION FAILED");
+        System.out.println("=========================================");
         return false;
-    }
-    
-    // Ultra-fast verification for known file patterns
-    public boolean verifyDownloadUltraFast() {
-        try {
-            String downloadPath = System.getProperty("user.home") + "/Downloads/";
-            File downloadDir = new File(downloadPath);
-            
-            System.out.println("Ultra-fast download verification...");
-            
-            // Only wait 8 seconds maximum
-            long startTime = System.currentTimeMillis();
-            long timeout = 8000;
-            
-            while (System.currentTimeMillis() - startTime < timeout) {
-                Thread.sleep(1500); // Check every 1.5 seconds
-                
-                File[] allFiles = downloadDir.listFiles();
-                if (allFiles != null) {
-                    Arrays.sort(allFiles, Comparator.comparingLong(File::lastModified).reversed());
-                    
-                    for (File file : allFiles) {
-                        if (file.isFile() && isFastVerificationFile(file)) {
-                            System.out.println("✓ Fast verification - File downloaded: " + file.getName());
-                            return true;
-                        }
-                    }
-                }
-            }
-            
-            System.out.println("⚠ Fast verification incomplete, file may still be downloading");
-            return false;
-            
-        } catch (Exception e) {
-            System.out.println("Error in ultra-fast verification: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    // Check for files that can be verified quickly
-    private boolean isFastVerificationFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        
-        boolean isPdf = fileName.endsWith(".pdf");
-        boolean isRecent = (System.currentTimeMillis() - file.lastModified()) < 20000; // 20 seconds
-        boolean hasContent = file.length() > 5120; // At least 5KB for faster verification
-        
-        if (!isPdf || !isRecent || !hasContent) {
-            return false;
-        }
-        
-        // Fast verification patterns (skip periodic tests)
-        String[] fastPatterns = {
-            "skill observation", "sail observation", "observation",
-            "progress report", "report card"
-        };
-        
-        String[] slowPatterns = {
-            "periodic test", "periodic", "test", "exam"
-        };
-        
-        // Check if it's a fast pattern file
-        for (String pattern : fastPatterns) {
-            if (fileName.contains(pattern)) {
-                return true;
-            }
-        }
-        
-        // Skip slow pattern files in ultra-fast verification
-        for (String pattern : slowPatterns) {
-            if (fileName.contains(pattern)) {
-                return false;
-            }
-        }
-        
-        return false;
-    }
-    
-    // Main optimized download verification method
-    public boolean verifyDownloadOptimized() {
-        System.out.println("Starting optimized download verification...");
-        
-        // First try ultra-fast verification for quick files
-        if (verifyDownloadUltraFast()) {
-            return true;
-        }
-        
-        // If ultra-fast fails, try the comprehensive verification
-        System.out.println("Ultra-fast verification failed, trying comprehensive verification...");
-        return verifyFileDownloadWithRetry();
     }
 }
