@@ -2,76 +2,44 @@ pipeline {
     agent any
     
     tools {
-        maven 'maven_repo'  // Your Maven tool name in Jenkins
-        jdk 'javaspace'         // Your JDK tool name in Jenkins
-    }
-    
-    options {
-        timeout(time: 30, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '5'))
+        maven 'maven_repo'
+        jdk 'javaspace'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[url: 'https://github.com/2397hushar/tusharjenkins.git']]
-                ])
-                
-                // Verify files exist
-                bat '''
-                    echo "=== Checking Project Structure ==="
-                    echo "Current Directory: %CD%"
-                    dir
-                    echo.
-                    echo "=== Java Files ==="
-                    dir /s /b *.java || echo "No Java files found"
-                    echo.
-                    echo "=== Looking for TestRunner ==="
-                    dir /s /b *TestRunner* || echo "TestRunner not found"
-                '''
+                checkout scm
+                echo "✅ Code checked out"
             }
         }
         
         stage('Clean') {
             steps {
-                bat '''
-                    echo "=== Cleaning Project ==="
-                    mvn clean -DskipTests
-                '''
+                bat 'mvn clean -DskipTests'
             }
         }
         
         stage('Compile') {
             steps {
-                bat '''
-                    echo "=== Compiling Tests ==="
-                    mvn compile test-compile
-                    
-                    echo "=== Checking Compiled Classes ==="
-                    if exist "target\\test-classes\\runners\\TestRunner.class" (
-                        echo "✓ TestRunner.class found!"
-                    ) else (
-                        echo "✗ TestRunner.class not found!"
-                        echo "Listing target directory:"
-                        dir /s /b target\\*.class
-                        exit 1
-                    )
-                '''
+                bat 'mvn compile test-compile'
             }
         }
         
         stage('Test') {
             steps {
-                bat '''
-                    echo "=== Running Verification Test ==="
-                    mvn test -Dtest=JenkinsVerificationTest || echo "Verification test may have warnings"
-                    
-                    echo "=== Running Main Tests ==="
-                    mvn test -Dtest=TestRunner
-                '''
+                script {
+                    echo "=== Running Regression Tests ==="
+                    bat '''
+                        mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@Regression"
+                    '''
+                }
+            }
+            post {
+                always {
+                    // Publish JUnit test results
+                    junit 'target/surefire-reports/*.xml'
+                }
             }
         }
     }
@@ -79,29 +47,31 @@ pipeline {
     post {
         always {
             echo "=== Collecting Test Reports ==="
-            junit 'target/surefire-reports/*.xml'
-            cucumber 'target/cucumber-*.json'
             
-            // Archive important files
-            archiveArtifacts artifacts: 'target/**/*.html, target/**/*.json, target/screenshots/**/*', fingerprint: true
-            
-            // Clean up workspace
-            cleanWs()
+            // Publish HTML reports
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'target/extent-reports',
+                reportFiles: '*.html',
+                reportName: 'Extent Report'
+            ])
         }
         success {
-            echo "✅ Pipeline SUCCESS!"
-            emailext (
-                subject: "Pipeline SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build ${env.BUILD_NUMBER} succeeded!",
-                to: 'tusharsangale2015@gmail.com'
+            echo "🎉 BUILD SUCCESSFUL!"
+            emailext(
+                subject: "Build Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "The build completed successfully.\n\nCheck reports at: ${env.BUILD_URL}",
+                to: "tusharsangale2015@gmail.com"
             )
         }
         failure {
-            echo "❌ Pipeline FAILED!"
-            emailext (
-                subject: "Pipeline FAILED: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                body: "Build ${env.BUILD_NUMBER} failed! Check: ${env.BUILD_URL}",
-                to: 'tusharsangale2015@gmail.com'
+            echo "❌ BUILD FAILED!"
+            emailext(
+                subject: "Build Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: "The build failed. Please check the logs at: ${env.BUILD_URL}",
+                to: "tusharsangale2015@gmail.com"
             )
         }
     }
