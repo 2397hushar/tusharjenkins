@@ -2,8 +2,8 @@ pipeline {
     agent any
     
     tools {
-        maven 'Maven_3.9.6'  // Your Maven tool name in Jenkins
-        jdk 'jdk-25'         // Your JDK tool name in Jenkins
+        maven 'maven_repo'  // Your Maven tool name in Jenkins
+        jdk 'javaspace'         // Your JDK tool name in Jenkins
     }
     
     options {
