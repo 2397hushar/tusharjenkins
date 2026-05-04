@@ -17,7 +17,7 @@ pipeline {
         stage('Create Features Directory') {
             steps {
                 bat '''
-                    if not exist src\\test\\resources\\features mkdir src\\test\\resources\\features
+                    if not exist src\\test\\resources\\features mkdir src\\test\\resources\\Reportcard.features
                     echo "✅ Features directory created"
                 '''
             }
