@@ -8,7 +8,7 @@ import org.testng.annotations.DataProvider;
 import utilities.ExtentReportManager;
 
 @CucumberOptions(
-    features = "src/test/resources/features",
+    features = "src/test/resources/feature",
     glue = {"stepDefinitions", "utilities"},
     plugin = {
         "pretty",
