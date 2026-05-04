@@ -14,6 +14,15 @@ pipeline {
             }
         }
         
+        stage('Create Features Directory') {
+            steps {
+                bat '''
+                    if not exist src\\test\\resources\\features mkdir src\\test\\resources\\features
+                    echo "✅ Features directory created"
+                '''
+            }
+        }
+        
         stage('Clean') {
             steps {
                 bat 'mvn clean -DskipTests'
@@ -31,7 +40,7 @@ pipeline {
                 script {
                     echo "=== Running Regression Tests ==="
                     bat '''
-                        mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@Regression"
+                        mvn test -Dtest=TestRunner -Dcucumber.filter.tags="@Regression" -Dheadless=true
                     '''
                 }
             }
@@ -47,32 +56,17 @@ pipeline {
     post {
         always {
             echo "=== Collecting Test Reports ==="
+            echo "📊 Extent Report location: target/extent-reports/"
             
-            // Publish HTML reports
-            publishHTML(target: [
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'target/extent-reports',
-                reportFiles: '*.html',
-                reportName: 'Extent Report'
-            ])
+            // Archive artifacts (works without additional plugin)
+            archiveArtifacts artifacts: 'target/extent-reports/**/*.html', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'target/surefire-reports/*.xml', allowEmptyArchive: true
         }
         success {
             echo "🎉 BUILD SUCCESSFUL!"
-            emailext(
-                subject: "Build Success: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: "The build completed successfully.\n\nCheck reports at: ${env.BUILD_URL}",
-                to: "tusharsangale2015@gmail.com"
-            )
         }
         failure {
             echo "❌ BUILD FAILED!"
-            emailext(
-                subject: "Build Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
-                body: "The build failed. Please check the logs at: ${env.BUILD_URL}",
-                to: "tusharsangale2015@gmail.com"
-            )
         }
     }
 }
