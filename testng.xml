@@ -1,14 +1,62 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="ERP Test Suite - Jenkins" parallel="false">
+<suite name="ERP Test Suite - Unified (Web + Mobile)" parallel="false">
+  
+  <!-- ============================================ -->
+  <!-- GLOBAL PARAMETERS                             -->
+  <!-- ============================================ -->
   <parameter name="headless" value="false"/>
   <parameter name="browser" value="chrome"/>
   <parameter name="environment" value="jenkins"/>
   
-  <test name="Cucumber Tests" preserve-order="true">
-    <parameter name="headless" value="false"/>
+  <!-- ============================================ -->
+  <!-- WEB TESTS (Group: web)                        -->
+  <!-- ============================================ -->
+  <test name="Web Tests - Cucumber" preserve-order="true">
+    <parameter name="test.platform" value="web"/>
+    
+    <!-- Run only web tests -->
+    <groups>
+      <run>
+        <include name="web"/>
+        <exclude name="mobile"/>
+      </run>
+    </groups>
+    
     <classes>
-      <class name="runners.TestRunner"/>
+      <class name="runners.TestRunner">
+        <methods>
+          <include name="runScenario"/>
+        </methods>
+      </class>
       <class name="stepDefinitions.LoginStepsReportCard"/>
     </classes>
   </test>
+  
+  <!-- ============================================ -->
+  <!-- MOBILE TESTS (Android APK)                    -->
+  <!-- ============================================ -->
+  <test name="Mobile Tests - Android APK" preserve-order="true">
+    <parameter name="test.platform" value="mobile"/>
+    <parameter name="platform" value="android"/>
+    <parameter name="device.name" value="emulator-5554"/>
+    <parameter name="udid" value="emulator-5554"/>
+    
+    <!-- Run only mobile tests -->
+    <groups>
+      <run>
+        <include name="mobile"/>
+        <exclude name="web"/>
+      </run>
+    </groups>
+    
+    <classes>
+      <class name="runners.TestRunner">
+        <methods>
+          <include name="runScenario"/>
+        </methods>
+      </class>
+      <class name="stepDefinitions.LoginStepsReportCard"/>
+    </classes>
+  </test>
+  
 </suite>

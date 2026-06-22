@@ -16,7 +16,7 @@ import utilities.ExtentReportManager;
         "json:target/cucumber.json"
     },
     monochrome = true,
-    tags = "@Regression"
+    tags = "@android"
 )
 public class TestRunner extends AbstractTestNGCucumberTests {
 

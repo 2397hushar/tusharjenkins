@@ -1,34 +1,23 @@
-#Feature: Report Cards Module Functionality
+@android
+Feature: Android Report Card
 
- # Scenario Outline: Complete report cards flow for student marksheet
-  #  Given I am on the application login page
-  #  When I login with valid admin credentials
-  #  And I scroll down to Academic Progress section
-  #  And I click on Marksheet option
-  #  And I select current academic year from dropdown
-  #  And I select a student from student dropdown
-  #  When I click on View button for report card
-  #  Then I should see report card details page
-  #  When I click on Download button
-  #  Then report card file should download successfully
-  
-  Feature: Report Cards Module Functionality with Multiple Users
-  @Regression  
+  Background:
+    Given I am on android application login page
 
-  Scenario Outline: Complete report cards flow for student marksheet with different users
-    Given I am on the application login page for user "<userType>"
-    When I login with valid admin credentials for "<userType>"
-    And I scroll down to Academic Progress section
-    And I click on Marksheet option
-    And I select current academic year from dropdown
-    And I select a student from student dropdown
-    When I click on View button for report card
-    Then I should see report card details page 
-    When I click on Download button 
-    Then report card file should download successfully for "<userType>"
+  Scenario Outline: Download report card in android - <user>
+    When I login with valid android admin credentials for "<user>"
+    And I click on android Marksheet option
+    And I select current android academic year from dropdown 
+    And I select android student from student dropdown
+    When I click on android View button for report card
+    Then I should see android report card details page
+    When I click on android Download button
+    Then android report card file should download successfully for "<user>" 
 
     Examples:
-      | userType |
-      | User 1   |
-      | User 2   |
-      
+      | user   |    
+      | User 1 |
+      | User 2 |
+      | User 3 |
+      | User 4 |
+       
