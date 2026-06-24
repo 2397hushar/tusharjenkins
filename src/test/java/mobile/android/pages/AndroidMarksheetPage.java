@@ -8,9 +8,11 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.RemoteWebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 import com.google.common.collect.ImmutableMap;
 
+import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AndroidFindBy;
 import mobile.android.pages.locators.AndroidLocators;
 import mobile.android.pages.locators.AndroidLocators.Login;
@@ -45,6 +47,9 @@ public class AndroidMarksheetPage extends AndroidBasePage {
     
     @AndroidFindBy(id =ReportCard.SAVE_BUTTON)
     private WebElement savebuttonpdf;
+    
+    @AndroidFindBy(accessibility =Marksheet.Arrow_Back)
+    private WebElement backarrowclick;
     
     public AndroidMarksheetPage() {
         super();
@@ -189,6 +194,22 @@ public class AndroidMarksheetPage extends AndroidBasePage {
             throw new RuntimeException(e);
         }
     }
+    
+    public void clickBackArrow() {
+
+        try {
+
+            ((AndroidDriver) driver)
+                    .pressKey(new KeyEvent(AndroidKey.BACK));
+
+            System.out.println("Clicked Android Back");
+
+        } catch (Exception e) {
+
+            System.out.println("Failed to click back: " + e.getMessage());
+        }
+    }
+    
     
     public boolean isMarksheetPageDisplayed() {
         try {

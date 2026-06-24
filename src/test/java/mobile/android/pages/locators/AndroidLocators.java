@@ -92,7 +92,8 @@ public class AndroidLocators {
         public static final String VIEW_BUTTON_XPATH = "//android.view.View[@content-desc='CIE Grade 1 to 10 Annual Performance Portrait']/android.widget.ImageView[2]";
         public static final String DOWNLOAD_BUTTON_XPATH = "//android.view.View[@content-desc='CIE Grade 1 to 10 Annual Performance Portrait']/android.widget.ImageView[1]";
         public static final String Navigate_back_button="Navigate up";
-
+        public static final String Arrow_Back="Navigate up";
+        
     }
     // ============================================
     // REPORT CARD PAGE - ANDROID

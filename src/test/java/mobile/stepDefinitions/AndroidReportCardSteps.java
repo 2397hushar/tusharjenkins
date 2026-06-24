@@ -207,21 +207,20 @@ public class AndroidReportCardSteps {
     
     @When("I click on android View button for report card")
     public void i_click_on_android_view_button_for_report_card() {
+
         System.out.println("👁️ Clicking View button for report card");
 
-        if (marksheetPage == null) {
-            marksheetPage = new AndroidMarksheetPage();
-        }
+        marksheetPage = new AndroidMarksheetPage();
 
         marksheetPage.clickViewButton();
-        waitForElement(2);
-        reportCardPage.takeScreenshotForStep("6_Report_Card_Opened");
 
-        marksheetPage.waitForPageLoad();
-        
-        marksheetPage.clickNavigateUp();
+        waitForElement(1);
 
         reportCardPage = new AndroidReportCardPage();
+
+        reportCardPage.takeScreenshotForStep("6_Report_Card_Opened");
+
+        marksheetPage.clickBackArrow();
     }
     
     // ============================================
@@ -262,17 +261,7 @@ public class AndroidReportCardSteps {
         waitForElement(3);
         marksheetPage.takeScreenshot("7_Download_Clicked");
         logoutAndPrepareForNextUser();
-        // Logout process
-//        reportCardPage.clickOnLogoutButton();
-//        waitForElement(2);
-//        reportCardPage.clickCloseButton();
-//        waitForElement(2);
-//        
-//        // Click Let's Connect for next login
-//        loginPage.clickLetsConnectButtonForRelogin();
-//        waitForElement(2);
-//        
-//        reportCardPage.takeScreenshotForStep("8_Download_Clicked");
+       
     }
     
     @Then("android report card file should download successfully")
